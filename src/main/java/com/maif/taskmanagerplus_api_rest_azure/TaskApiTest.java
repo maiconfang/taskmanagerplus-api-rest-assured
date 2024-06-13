@@ -61,6 +61,7 @@ public class TaskApiTest {
 	            .body("title", equalTo("New Task"))
 	            .extract().response();
 	        
+	        response.then().statusCode(201);
 	        
 	    }
 
@@ -83,6 +84,7 @@ public class TaskApiTest {
 
 	        given()
 	            .header("Content-Type", "application/json")
+	            .header("Authorization", "Bearer " + token)
 	            .body(requestBody)
 	            .when()
 	            .put("/tasks/" + taskId)
@@ -96,6 +98,8 @@ public class TaskApiTest {
 	        int taskId = 1; // replace with actual task id
 
 	        given()
+            	.header("Content-Type", "application/json")
+            	.header("Authorization", "Bearer " + token)
 	            .when()
 	            .delete("/tasks/" + taskId)
 	            .then()
@@ -105,6 +109,8 @@ public class TaskApiTest {
 	    @Test
 	    public void testFilterTasks() {
 	        given()
+	            .header("Content-Type", "application/json")
+	            .header("Authorization", "Bearer " + token)
 	            .queryParam("dueDate", "2024-07-01T00:00:00Z")
 	            .queryParam("completed", "false")
 	            .queryParam("page", 0)
