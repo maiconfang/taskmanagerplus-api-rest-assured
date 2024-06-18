@@ -1,6 +1,6 @@
 package com.maif.taskmanagerplus_api_rest_azure.tests.base;
 
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 
 import com.maif.taskmanagerplus_api_rest_azure.auth.AuthUtil;
 
@@ -9,8 +9,8 @@ import io.restassured.RestAssured;
 public class BaseTest {
 	
 	
-    @BeforeEach
-    public void setup() {
+	@BeforeAll
+	public static void setup() {
         AuthUtil.authenticate();
         
         // Sets the complete base URL
