@@ -6,13 +6,15 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.Matchers.equalTo;
 
+import java.util.Date;
+
 import org.junit.jupiter.api.Test;
 
 import com.maif.taskmanagerplus_api_rest_azure.tests.base.BaseTest;
-import com.maif.taskmanagerplus_api_rest_azure.util.TestUtil;
+import com.maif.taskmanagerplus_api_rest_azure.tests.util.DatabaseInsertUtil;
+import com.maif.taskmanagerplus_api_rest_azure.tests.util.TestUtil;
 
 import io.restassured.RestAssured;
-import io.restassured.response.Response;
 
 /**
  * Tests for the Task API endpoints using RestAssured.
@@ -26,6 +28,7 @@ public class TaskApiTest extends BaseTest {
     
     private static final String TASKS_PATH = "/tasks"; // Static variable for the path "/tasks"
     private static final String TASKS_PATH_NOPAGINATION = "/noPagination";
+    
 
     @Test
     public void testCreateTask() {
@@ -43,62 +46,56 @@ public class TaskApiTest extends BaseTest {
     
     @Test
     public void testDeleteTask() {
-
-        // Create a task to ensure there is something to delete
-        String requestBody = "{ \"title\": \"Task to Delete\", \"description\": \"Task Description\", \"dueDate\": \"2024-06-30T00:00:00Z\", \"completed\": false }";
-
-        // Send the creation request and log the details
-        Response createResponse = given()
-            .spec(TestUtil.addTokenHeader(RestAssured.given()))
-            .body(requestBody)
-//            .log().all() // Log all request details
-            .when()
-            .post(RestAssured.baseURI + TASKS_PATH)
-            .then()
-//            .log().all() // Log all response details
-            .statusCode(201)
-            .extract().response();
-
-        // Extract the ID of the created task
-        int taskIdNew = createResponse.path("id");
+    	
+    	// Insert a task into the database and get the ID
+    	Date dueDate = java.sql.Timestamp.valueOf("2024-06-30 00:00:00");
+    	 
+        int taskIdNew = DatabaseInsertUtil.insertTask("Task to Delete", "Task Description", dueDate, false);
 
         // Send the deletion request and log the details
         given()
             .spec(TestUtil.addTokenHeader(RestAssured.given()))
-//            .log().all() // Log all request details
             .when()
             .delete(RestAssured.baseURI + TASKS_PATH + "/" + taskIdNew)
             .then()
-//            .log().all() // Log all response details
             .statusCode(204);
     }
     
    @Test
     public void testGetTask() {
-        int taskId = 1; // Replace with the actual task ID
+        
+    	Date dueDate = java.sql.Timestamp.valueOf("2024-06-30 00:00:00");
+        int taskIdGet = DatabaseInsertUtil.insertTask("Task to Get", "Task Description Get", dueDate, false);
 
         given()
             .spec(TestUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
             .when()
-            .get(RestAssured.baseURI + TASKS_PATH + "/" + taskId) // Builds the complete URL using RestAssured.baseURI and TASKS_PATH
+            .get(RestAssured.baseURI + TASKS_PATH + "/" + taskIdGet) // Builds the complete URL using RestAssured.baseURI and TASKS_PATH
             .then()
             .statusCode(200)
-            .body("id", equalTo(taskId));
+            .body("id", equalTo(taskIdGet));
+        
+        DatabaseInsertUtil.deleteTask(taskIdGet);
     }
     
    @Test
     public void testUpdateTask() {
-        int taskId = 1; // Replace with the actual task ID
-        String requestBody = "{ \"id\": " + taskId + ", \"title\": \"Updated Task\", \"description\": \"Updated Description\", \"dueDate\": \"2024-07-01T00:00:00Z\", \"completed\": true }";
+        
+    	Date dueDate = java.sql.Timestamp.valueOf("2024-06-20 10:00:00");
+        int taskIdUpdate = DatabaseInsertUtil.insertTask("Task will be updated", "Task Description will be updated", dueDate, false);
+        
+        String requestBody = "{ \"id\": " + taskIdUpdate + ", \"title\": \"Updated Task\", \"description\": \"Updated Description\", \"dueDate\": \"2024-07-01T00:00:00Z\", \"completed\": true }";
 
         given()
             .spec(TestUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
             .body(requestBody)
             .when()
-            .put(RestAssured.baseURI + TASKS_PATH + "/" + taskId) // Builds the complete URL using RestAssured.baseURI and TASKS_PATH
+            .put(RestAssured.baseURI + TASKS_PATH + "/" + taskIdUpdate) // Builds the complete URL using RestAssured.baseURI and TASKS_PATH
             .then()
             .statusCode(200)
             .body("title", equalTo("Updated Task"));
+        
+        DatabaseInsertUtil.deleteTask(taskIdUpdate);
     }
     
     

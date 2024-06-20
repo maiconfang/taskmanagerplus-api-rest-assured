@@ -8,12 +8,13 @@ import io.restassured.RestAssured;
 
 public class BaseTest {
 	
-	
 	@BeforeAll
 	public static void setup() {
+		
+        // Perform authentication
         AuthUtil.authenticate();
         
-        // Sets the complete base URL
+        // Set the complete base URL
         RestAssured.baseURI = "http://localhost:8080/v1";
     }
     

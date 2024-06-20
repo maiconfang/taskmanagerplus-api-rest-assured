@@ -1,4 +1,4 @@
-package com.maif.taskmanagerplus_api_rest_azure.util;
+package com.maif.taskmanagerplus_api_rest_azure.tests.util;
 
 
 import com.maif.taskmanagerplus_api_rest_azure.auth.AuthUtil;
