@@ -16,6 +16,9 @@ import com.maif.taskmanagerplus_api_rest_azure.tests.util.TestUtil;
 
 import io.restassured.RestAssured;
 
+import io.restassured.response.Response;
+
+
 /**
  * Tests for the Task API endpoints using RestAssured.
  * These tests cover CRUD operations and various filters.
@@ -34,15 +37,24 @@ public class TaskApiTest extends BaseTest {
     public void testCreateTask() {
         String requestBody = "{ \"title\": \"New Task\", \"description\": \"New Task Description\", \"dueDate\": \"2024-06-30T00:00:00Z\", \"completed\": false }";
 
-        given()
+        // Perform POST request to create a task
+        Response response = given()
             .spec(TestUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
             .body(requestBody)
             .when()
             .post(RestAssured.baseURI + TASKS_PATH) // Builds the complete URL using RestAssured.baseURI and TASKS_PATH
             .then()
             .statusCode(201)
-            .body("title", equalTo("New Task"));
+            .body("title", equalTo("New Task"))
+            .extract().response(); // Extracts the HTTP response
+
+        // Extract the ID of the created task from the JSON response
+        int taskId = response.path("id");
+
+        // Delete the created task from the database
+        DatabaseInsertUtil.deleteTask(taskId);
     }
+
     
     @Test
     public void testDeleteTask() {
@@ -100,25 +112,39 @@ public class TaskApiTest extends BaseTest {
     
     
     @Test
-    public void testFilterTasks() {
+    public void testFilterIdWithPaginationTask() {
+    	
+    	Date dueDate = java.sql.Timestamp.valueOf("2024-06-20 16:15:20");
+        int taskIdFilterIdWithPag = DatabaseInsertUtil.insertTask("Task to FilterIdWithPagination", "Task Description FilterIdWithPagination", dueDate, false);
+    	
         given()
             .spec(TestUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
-            .queryParam("dueDate", "2024-07-01T00:00:00Z")
+            .queryParam("taskId", taskIdFilterIdWithPag)
             .queryParam("completed", "false")
             .queryParam("page", 0)
             .queryParam("size", 10)
             .when()
             .get(RestAssured.baseURI + TASKS_PATH) // Uses the static variable for the path "/tasks"
             .then()
-            .statusCode(200);
+            .statusCode(200)
+            .body("_embedded.tasks[0].id", equalTo(taskIdFilterIdWithPag))
+            .body("_embedded.tasks[0].title", equalTo("Task to FilterIdWithPagination"))
+            .body("_embedded.tasks[0].description", equalTo("Task Description FilterIdWithPagination"))
+            .body("_embedded.tasks[0].dueDate", equalTo("2024-06-20T16:15:20Z"))
+            .body("_embedded.tasks[0].completed", equalTo(false));;
+        
+        DatabaseInsertUtil.deleteTask(taskIdFilterIdWithPag);
     }
     
     @Test
     public void testFilterTitleWithPaginationTask() {
     	
+    	Date dueDate = java.sql.Timestamp.valueOf("2024-06-20 15:40:20");
+        int taskIdFilterTitleWithPag = DatabaseInsertUtil.insertTask("Task to TitleWithPagination", "Task Description TitleWithPagination", dueDate, false);
+    	
     	given()
         .spec(TestUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
-        .queryParam("title", "Task 2")
+        .queryParam("title", "Task to TitleWithPagination")
         .queryParam("page", 0)
         .queryParam("size", 10)
         .when()
@@ -126,107 +152,139 @@ public class TaskApiTest extends BaseTest {
         .then()
         .statusCode(200)
 //        .log().all()
-        .body("_embedded.tasks[0].title", equalTo("Task 2"))
-        .body("_embedded.tasks[0].description", equalTo("Description for Task 2"))
-        .body("_embedded.tasks[0].dueDate", equalTo("2024-07-01T00:00:00Z"))
+        .body("_embedded.tasks[0].title", equalTo("Task to TitleWithPagination"))
+        .body("_embedded.tasks[0].description", equalTo("Task Description TitleWithPagination"))
+        .body("_embedded.tasks[0].dueDate", equalTo("2024-06-20T15:40:20Z"))
         .body("_embedded.tasks[0].completed", equalTo(false));
+    	
+    	DatabaseInsertUtil.deleteTask(taskIdFilterTitleWithPag);
 
     }
     
     @Test
     public void testFilterDescriptionWithPaginationTask() {
     	
+    	Date dueDate = java.sql.Timestamp.valueOf("2024-06-20 15:48:30");
+        int taskIdFilterDescriptionWithPag = DatabaseInsertUtil.insertTask("Task to FilterDescriptionWithPagination", "Task Description FilterDescriptionWithPagination", dueDate, true);
+    	
     	given()
         .spec(TestUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
-        .queryParam("description", "Description for Task 2")
+        .queryParam("description", "Task Description FilterDescriptionWithPagination")
         .queryParam("page", 0)
         .queryParam("size", 10)
         .when()
         .get(RestAssured.baseURI + TASKS_PATH) // Uses the static variable for the path "/tasks"
         .then()
         .statusCode(200)
-        .body("_embedded.tasks[0].title", equalTo("Task 2"))
-        .body("_embedded.tasks[0].description", equalTo("Description for Task 2"))
-        .body("_embedded.tasks[0].dueDate", equalTo("2024-07-01T00:00:00Z"))
-        .body("_embedded.tasks[0].completed", equalTo(false));
+        .body("_embedded.tasks[0].title", equalTo("Task to FilterDescriptionWithPagination"))
+        .body("_embedded.tasks[0].description", equalTo("Task Description FilterDescriptionWithPagination"))
+        .body("_embedded.tasks[0].dueDate", equalTo("2024-06-20T15:48:30Z"))
+        .body("_embedded.tasks[0].completed", equalTo(true));
+    	
+    	DatabaseInsertUtil.deleteTask(taskIdFilterDescriptionWithPag);
 
     }
     
     @Test
     public void testFilterDueDateWithPaginationTask() {
     	
-    	given()
-        .spec(TestUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
-        .queryParam("dueDate", "2024-07-01T00:00:00Z")
-        .queryParam("page", 0)
-        .queryParam("size", 10)
-        .when()
-        .get(RestAssured.baseURI + TASKS_PATH) // Uses the static variable for the path "/tasks"
-        .then()
-        .statusCode(200)
-        .body("_embedded.tasks[0].title", equalTo("Task 2"))
-        .body("_embedded.tasks[0].description", equalTo("Description for Task 2"))
-        .body("_embedded.tasks[0].dueDate", equalTo("2024-07-01T00:00:00Z"))
-        .body("_embedded.tasks[0].completed", equalTo(false));
-
-    }
-    
-    @Test
-    public void testFilterCompletedWithPaginationTask() {
+    	Date dueDate = java.sql.Timestamp.valueOf("2024-06-20 16:02:10");
+        int taskIdFilterDueDateWithPag = DatabaseInsertUtil.insertTask("Task to FilterDueDateWithPagination", "Task Description FilterDueDateWithPagination", dueDate, true);
     	
     	given()
         .spec(TestUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
-        .queryParam("dueDate", "2024-07-01T00:00:00Z")
+        .queryParam("dueDate", "2024-06-20T16:02:10Z")
         .queryParam("page", 0)
         .queryParam("size", 10)
         .when()
         .get(RestAssured.baseURI + TASKS_PATH) // Uses the static variable for the path "/tasks"
         .then()
         .statusCode(200)
-        .body("_embedded.tasks[0].title", equalTo("Task 2"))
-        .body("_embedded.tasks[0].description", equalTo("Description for Task 2"))
-        .body("_embedded.tasks[0].dueDate", equalTo("2024-07-01T00:00:00Z"))
-        .body("_embedded.tasks[0].completed", equalTo(false));
+        .body("_embedded.tasks[0].title", equalTo("Task to FilterDueDateWithPagination"))
+        .body("_embedded.tasks[0].description", equalTo("Task Description FilterDueDateWithPagination"))
+        .body("_embedded.tasks[0].dueDate", equalTo("2024-06-20T16:02:10Z"))
+        .body("_embedded.tasks[0].completed", equalTo(true));
+    	
+    	DatabaseInsertUtil.deleteTask(taskIdFilterDueDateWithPag);
 
     }
+    
     
     @Test
     public void testFilterCompletedAndTitleWithPaginationTask() {
     	
+    	Date dueDate = java.sql.Timestamp.valueOf("2024-06-20 16:12:10");
+        int taskIdFilterCompletedAndTitleWithPag = DatabaseInsertUtil.insertTask("Task to FilterCompletedAndTitle", "Task Description FilterCompletedAndTitle", dueDate, false);
+    	
     	given()
         .spec(TestUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
         .queryParam("completed", "false")
-        .queryParam("title", "Task 2")
+        .queryParam("title", "Task to FilterCompletedAndTitle")
         .queryParam("page", 0)
         .queryParam("size", 10)
         .when()
         .get(RestAssured.baseURI + TASKS_PATH) // Uses the static variable for the path "/tasks"
         .then()
         .statusCode(200)
-        .body("_embedded.tasks[0].title", equalTo("Task 2"))
-        .body("_embedded.tasks[0].description", equalTo("Description for Task 2"))
-        .body("_embedded.tasks[0].dueDate", equalTo("2024-07-01T00:00:00Z"))
+        .body("_embedded.tasks[0].title", equalTo("Task to FilterCompletedAndTitle"))
+        .body("_embedded.tasks[0].description", equalTo("Task Description FilterCompletedAndTitle"))
+        .body("_embedded.tasks[0].dueDate", equalTo("2024-06-20T16:12:10Z"))
         .body("_embedded.tasks[0].completed", equalTo(false));
+    	
+    	DatabaseInsertUtil.deleteTask(taskIdFilterCompletedAndTitleWithPag);
 
     }
     
     @Test
+    public void testFilterIdAndTitleAndDescriptionAndDueDateAndCompletedWithPaginationTask() {
+    	
+    	Date dueDate = java.sql.Timestamp.valueOf("2024-06-20 16:21:20");
+        int taskId = DatabaseInsertUtil.insertTask("Task to TitleDescriptionDueDate", "Task Description TitleDescriptionDueDate", dueDate, false);
+    	
+        given()
+            .spec(TestUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
+            .queryParam("taskId", taskId)
+            .queryParam("title", "Task to TitleDescriptionDueDate")
+            .queryParam("description", "Task Description TitleDescriptionDueDate")
+            .queryParam("dueDate", "2024-06-20T16:21:20Z")
+            .queryParam("completed", "false")
+            .queryParam("page", 0)
+            .queryParam("size", 10)
+            .when()
+            .get(RestAssured.baseURI + TASKS_PATH) // Uses the static variable for the path "/tasks"
+            .then()
+            .statusCode(200)
+            .body("_embedded.tasks[0].id", equalTo(taskId))
+            .body("_embedded.tasks[0].title", equalTo("Task to TitleDescriptionDueDate"))
+            .body("_embedded.tasks[0].description", equalTo("Task Description TitleDescriptionDueDate"))
+            .body("_embedded.tasks[0].dueDate", equalTo("2024-06-20T16:21:20Z"))
+            .body("_embedded.tasks[0].completed", equalTo(false));;
+        
+        DatabaseInsertUtil.deleteTask(taskId);
+    }
+    
+    @Test
     public void testFilterTasksByTitleNoPagination() {
-        String expectedTitle = "Task 2";
+    	
+    	Date dueDate = java.sql.Timestamp.valueOf("2024-06-20 16:25:35");
+        int taskId = DatabaseInsertUtil.insertTask("Task to FilterTasksByTitleNoPagination", "Task Description FilterTasksByTitleNoPagination", dueDate, false);
+        
 
         // Makes the GET request to fetch tasks filtered by title
         RestAssured.given()
             .spec(TestUtil.addTokenHeader(RestAssured.given())) // Adds the authorization header
-            .queryParam("title", expectedTitle)
+            .queryParam("title", "Task to FilterTasksByTitleNoPagination")
             .when()
             .get(RestAssured.baseURI + TASKS_PATH + TASKS_PATH_NOPAGINATION)
             .then()
             .statusCode(200)
-            .body("_embedded.tasks[0].title", equalTo(expectedTitle)) // Checks if the title of the first task in the result is "Task 2"
-            .body("_embedded.tasks[0].description", equalTo("Description for Task 2")) // Checks the description
-            .body("_embedded.tasks[0].dueDate", equalTo("2024-07-01T00:00:00Z")) // Checks the due date
+            .body("_embedded.tasks[0].title", equalTo("Task to FilterTasksByTitleNoPagination")) // Checks if the title of the first task in the result is "Task to FilterTasksByTitleNoPagination"
+            .body("_embedded.tasks[0].description", equalTo("Task Description FilterTasksByTitleNoPagination")) // Checks the description
+            .body("_embedded.tasks[0].dueDate", equalTo("2024-06-20T16:25:35Z")) // Checks the due date
             .body("_embedded.tasks[0].completed", equalTo(false)) // Checks if it is not completed
             .body("page", nullValue()); // Checks if the "page" key is not present in the JSON response
+        
+        DatabaseInsertUtil.deleteTask(taskId);
     }
     
     @Test
