@@ -36,23 +36,28 @@ public class TaskApiTest extends BaseTest {
     @Test
     public void testCreateTask() {
         String requestBody = "{ \"title\": \"New Task\", \"description\": \"New Task Description\", \"dueDate\": \"2024-06-30T00:00:00Z\", \"completed\": false }";
+        int taskId = 0; // Inicialize taskId
+        
+        try {
+            // Perform POST request to create a task
+            Response response = given()
+                .spec(TestUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
+                .body(requestBody)
+                .when()
+                .post(RestAssured.baseURI + TASKS_PATH) // Builds the complete URL using RestAssured.baseURI and TASKS_PATH
+                .then()
+                .statusCode(201)
+                .body("title", equalTo("New Task"))
+                .extract().response(); // Extracts the HTTP response
 
-        // Perform POST request to create a task
-        Response response = given()
-            .spec(TestUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
-            .body(requestBody)
-            .when()
-            .post(RestAssured.baseURI + TASKS_PATH) // Builds the complete URL using RestAssured.baseURI and TASKS_PATH
-            .then()
-            .statusCode(201)
-            .body("title", equalTo("New Task"))
-            .extract().response(); // Extracts the HTTP response
-
-        // Extract the ID of the created task from the JSON response
-        int taskId = response.path("id");
-
-        // Delete the created task from the database
-        DatabaseInsertUtil.deleteTask(taskId);
+            // Extract the ID of the created task from the JSON response
+            taskId = response.path("id");
+        } finally {
+            // Ensure that the created task is deleted from the database even if the test fails
+            if (taskId != 0) {
+                DatabaseInsertUtil.deleteTask(taskId);
+            }
+        }
     }
 
     
@@ -73,219 +78,294 @@ public class TaskApiTest extends BaseTest {
             .statusCode(204);
     }
     
-   @Test
+    @Test
     public void testGetTask() {
-        
-    	Date dueDate = java.sql.Timestamp.valueOf("2024-06-30 00:00:00");
-        int taskIdGet = DatabaseInsertUtil.insertTask("Task to Get", "Task Description Get", dueDate, false);
+        int taskIdGet = 0; // Inicialize taskIdGet
 
-        given()
-            .spec(TestUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
-            .when()
-            .get(RestAssured.baseURI + TASKS_PATH + "/" + taskIdGet) // Builds the complete URL using RestAssured.baseURI and TASKS_PATH
-            .then()
-            .statusCode(200)
-            .body("id", equalTo(taskIdGet));
-        
-        DatabaseInsertUtil.deleteTask(taskIdGet);
+        try {
+            // Insert a task into the database
+            Date dueDate = java.sql.Timestamp.valueOf("2024-06-30 00:00:00");
+            taskIdGet = DatabaseInsertUtil.insertTask("Task to Get", "Task Description Get", dueDate, false);
+
+            // Perform GET request to retrieve the task
+            given()
+                .spec(TestUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
+                .when()
+                .get(RestAssured.baseURI + TASKS_PATH + "/" + taskIdGet) // Builds the complete URL using RestAssured.baseURI and TASKS_PATH
+                .then()
+                .statusCode(200)
+                .body("id", equalTo(taskIdGet));
+        } finally {
+            // Ensure that the inserted task is deleted from the database even if the test fails
+            if (taskIdGet != 0) {
+                DatabaseInsertUtil.deleteTask(taskIdGet);
+            }
+        }
     }
+
     
-   @Test
+    @Test
     public void testUpdateTask() {
+        int taskIdUpdate = 0; // Inicialize taskIdUpdate
         
-    	Date dueDate = java.sql.Timestamp.valueOf("2024-06-20 10:00:00");
-        int taskIdUpdate = DatabaseInsertUtil.insertTask("Task will be updated", "Task Description will be updated", dueDate, false);
-        
-        String requestBody = "{ \"id\": " + taskIdUpdate + ", \"title\": \"Updated Task\", \"description\": \"Updated Description\", \"dueDate\": \"2024-07-01T00:00:00Z\", \"completed\": true }";
+        try {
+            // Insert a task into the database
+            Date dueDate = java.sql.Timestamp.valueOf("2024-06-20 10:00:00");
+            taskIdUpdate = DatabaseInsertUtil.insertTask("Task will be updated", "Task Description will be updated", dueDate, false);
+            
+            // Prepare the request body for updating the task
+            String requestBody = "{ \"id\": " + taskIdUpdate + ", \"title\": \"Updated Task\", \"description\": \"Updated Description\", \"dueDate\": \"2024-07-01T00:00:00Z\", \"completed\": true }";
 
-        given()
-            .spec(TestUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
-            .body(requestBody)
-            .when()
-            .put(RestAssured.baseURI + TASKS_PATH + "/" + taskIdUpdate) // Builds the complete URL using RestAssured.baseURI and TASKS_PATH
-            .then()
-            .statusCode(200)
-            .body("title", equalTo("Updated Task"));
-        
-        DatabaseInsertUtil.deleteTask(taskIdUpdate);
+            // Perform PUT request to update the task
+            given()
+                .spec(TestUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
+                .body(requestBody)
+                .when()
+                .put(RestAssured.baseURI + TASKS_PATH + "/" + taskIdUpdate) // Builds the complete URL using RestAssured.baseURI and TASKS_PATH
+                .then()
+                .statusCode(200)
+                .body("title", equalTo("Updated Task"));
+        } finally {
+            // Ensure that the updated task is deleted from the database even if the test fails
+            if (taskIdUpdate != 0) {
+                DatabaseInsertUtil.deleteTask(taskIdUpdate);
+            }
+        }
     }
+
     
     
     @Test
     public void testFilterIdWithPaginationTask() {
-    	
-    	Date dueDate = java.sql.Timestamp.valueOf("2024-06-20 16:15:20");
-        int taskIdFilterIdWithPag = DatabaseInsertUtil.insertTask("Task to FilterIdWithPagination", "Task Description FilterIdWithPagination", dueDate, false);
-    	
-        given()
-            .spec(TestUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
-            .queryParam("taskId", taskIdFilterIdWithPag)
-            .queryParam("completed", "false")
-            .queryParam("page", 0)
-            .queryParam("size", 10)
-            .when()
-            .get(RestAssured.baseURI + TASKS_PATH) // Uses the static variable for the path "/tasks"
-            .then()
-            .statusCode(200)
-            .body("_embedded.tasks[0].id", equalTo(taskIdFilterIdWithPag))
-            .body("_embedded.tasks[0].title", equalTo("Task to FilterIdWithPagination"))
-            .body("_embedded.tasks[0].description", equalTo("Task Description FilterIdWithPagination"))
-            .body("_embedded.tasks[0].dueDate", equalTo("2024-06-20T16:15:20Z"))
-            .body("_embedded.tasks[0].completed", equalTo(false));
+        int taskIdFilterIdWithPag = 0; // Inicialize taskIdFilterIdWithPag
         
-        DatabaseInsertUtil.deleteTask(taskIdFilterIdWithPag);
+        try {
+            // Insert a task into the database
+            Date dueDate = java.sql.Timestamp.valueOf("2024-06-20 16:15:20");
+            taskIdFilterIdWithPag = DatabaseInsertUtil.insertTask("Task to FilterIdWithPagination", "Task Description FilterIdWithPagination", dueDate, false);
+
+            // Perform GET request with query parameters
+            given()
+                .spec(TestUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
+                .queryParam("taskId", taskIdFilterIdWithPag)
+                .queryParam("completed", "false")
+                .queryParam("page", 0)
+                .queryParam("size", 10)
+                .when()
+                .get(RestAssured.baseURI + TASKS_PATH) // Uses the static variable for the path "/tasks"
+                .then()
+                .statusCode(200)
+                .body("_embedded.tasks[0].id", equalTo(taskIdFilterIdWithPag))
+                .body("_embedded.tasks[0].title", equalTo("Task to FilterIdWithPagination"))
+                .body("_embedded.tasks[0].description", equalTo("Task Description FilterIdWithPagination"))
+                .body("_embedded.tasks[0].dueDate", equalTo("2024-06-20T16:15:20Z"))
+                .body("_embedded.tasks[0].completed", equalTo(false));
+        } finally {
+            // Ensure that the inserted task is deleted from the database even if the test fails
+            if (taskIdFilterIdWithPag != 0) {
+                DatabaseInsertUtil.deleteTask(taskIdFilterIdWithPag);
+            }
+        }
     }
+
     
     @Test
     public void testFilterTitleWithPaginationTask() {
-    	
-    	Date dueDate = java.sql.Timestamp.valueOf("2024-06-20 15:40:20");
-        int taskIdFilterTitleWithPag = DatabaseInsertUtil.insertTask("Task to TitleWithPagination", "Task Description TitleWithPagination", dueDate, false);
-    	
-    	given()
-        .spec(TestUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
-        .queryParam("title", "Task to TitleWithPagination")
-        .queryParam("page", 0)
-        .queryParam("size", 10)
-        .when()
-        .get(RestAssured.baseURI + TASKS_PATH) // Uses the static variable for the path "/tasks"
-        .then()
-        .statusCode(200)
-//        .log().all()
-        .body("_embedded.tasks[0].title", equalTo("Task to TitleWithPagination"))
-        .body("_embedded.tasks[0].description", equalTo("Task Description TitleWithPagination"))
-        .body("_embedded.tasks[0].dueDate", equalTo("2024-06-20T15:40:20Z"))
-        .body("_embedded.tasks[0].completed", equalTo(false));
-    	
-    	DatabaseInsertUtil.deleteTask(taskIdFilterTitleWithPag);
+        int taskIdFilterTitleWithPag = 0; // Inicialize taskIdFilterTitleWithPag
+        
+        try {
+            // Insert a task into the database
+            Date dueDate = java.sql.Timestamp.valueOf("2024-06-20 15:40:20");
+            taskIdFilterTitleWithPag = DatabaseInsertUtil.insertTask("Task to TitleWithPagination", "Task Description TitleWithPagination", dueDate, false);
 
+            // Perform GET request with query parameters
+            given()
+                .spec(TestUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
+                .queryParam("title", "Task to TitleWithPagination")
+                .queryParam("page", 0)
+                .queryParam("size", 10)
+                .when()
+                .get(RestAssured.baseURI + TASKS_PATH) // Uses the static variable for the path "/tasks"
+                .then()
+                .statusCode(200)
+                .body("_embedded.tasks[0].title", equalTo("Task to TitleWithPagination"))
+                .body("_embedded.tasks[0].description", equalTo("Task Description TitleWithPagination"))
+                .body("_embedded.tasks[0].dueDate", equalTo("2024-06-20T15:40:20Z"))
+                .body("_embedded.tasks[0].completed", equalTo(false));
+        } finally {
+            // Ensure that the inserted task is deleted from the database even if the test fails
+            if (taskIdFilterTitleWithPag != 0) {
+                DatabaseInsertUtil.deleteTask(taskIdFilterTitleWithPag);
+            }
+        }
     }
+
     
     @Test
     public void testFilterDescriptionWithPaginationTask() {
-    	
-    	Date dueDate = java.sql.Timestamp.valueOf("2024-06-20 15:48:30");
-        int taskIdFilterDescriptionWithPag = DatabaseInsertUtil.insertTask("Task to FilterDescriptionWithPagination", "Task Description FilterDescriptionWithPagination", dueDate, true);
-    	
-    	given()
-        .spec(TestUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
-        .queryParam("description", "Task Description FilterDescriptionWithPagination")
-        .queryParam("page", 0)
-        .queryParam("size", 10)
-        .when()
-        .get(RestAssured.baseURI + TASKS_PATH) // Uses the static variable for the path "/tasks"
-        .then()
-        .statusCode(200)
-        .body("_embedded.tasks[0].title", equalTo("Task to FilterDescriptionWithPagination"))
-        .body("_embedded.tasks[0].description", equalTo("Task Description FilterDescriptionWithPagination"))
-        .body("_embedded.tasks[0].dueDate", equalTo("2024-06-20T15:48:30Z"))
-        .body("_embedded.tasks[0].completed", equalTo(true));
-    	
-    	DatabaseInsertUtil.deleteTask(taskIdFilterDescriptionWithPag);
+        int taskIdFilterDescriptionWithPag = 0; // Inicialize taskIdFilterDescriptionWithPag
+        
+        try {
+            // Insert a task into the database
+            Date dueDate = java.sql.Timestamp.valueOf("2024-06-20 15:48:30");
+            taskIdFilterDescriptionWithPag = DatabaseInsertUtil.insertTask("Task to FilterDescriptionWithPagination", "Task Description FilterDescriptionWithPagination", dueDate, true);
 
+            // Perform GET request with query parameters
+            given()
+                .spec(TestUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
+                .queryParam("description", "Task Description FilterDescriptionWithPagination")
+                .queryParam("page", 0)
+                .queryParam("size", 10)
+                .when()
+                .get(RestAssured.baseURI + TASKS_PATH) // Uses the static variable for the path "/tasks"
+                .then()
+                .statusCode(200)
+                .body("_embedded.tasks[0].title", equalTo("Task to FilterDescriptionWithPagination"))
+                .body("_embedded.tasks[0].description", equalTo("Task Description FilterDescriptionWithPagination"))
+                .body("_embedded.tasks[0].dueDate", equalTo("2024-06-20T15:48:30Z"))
+                .body("_embedded.tasks[0].completed", equalTo(true));
+        } finally {
+            // Ensure that the inserted task is deleted from the database even if the test fails
+            if (taskIdFilterDescriptionWithPag != 0) {
+                DatabaseInsertUtil.deleteTask(taskIdFilterDescriptionWithPag);
+            }
+        }
     }
+
     
     @Test
     public void testFilterDueDateWithPaginationTask() {
-    	
-    	Date dueDate = java.sql.Timestamp.valueOf("2024-06-20 16:02:10");
-        int taskIdFilterDueDateWithPag = DatabaseInsertUtil.insertTask("Task to FilterDueDateWithPagination", "Task Description FilterDueDateWithPagination", dueDate, true);
-    	
-    	given()
-        .spec(TestUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
-        .queryParam("dueDate", "2024-06-20T16:02:10Z")
-        .queryParam("page", 0)
-        .queryParam("size", 10)
-        .when()
-        .get(RestAssured.baseURI + TASKS_PATH) // Uses the static variable for the path "/tasks"
-        .then()
-        .statusCode(200)
-        .body("_embedded.tasks[0].title", equalTo("Task to FilterDueDateWithPagination"))
-        .body("_embedded.tasks[0].description", equalTo("Task Description FilterDueDateWithPagination"))
-        .body("_embedded.tasks[0].dueDate", equalTo("2024-06-20T16:02:10Z"))
-        .body("_embedded.tasks[0].completed", equalTo(true));
-    	
-    	DatabaseInsertUtil.deleteTask(taskIdFilterDueDateWithPag);
+        int taskIdFilterDueDateWithPag = 0; // Inicialize taskIdFilterDueDateWithPag
+        
+        try {
+            // Insert a task into the database
+            Date dueDate = java.sql.Timestamp.valueOf("2024-06-20 16:02:10");
+            taskIdFilterDueDateWithPag = DatabaseInsertUtil.insertTask("Task to FilterDueDateWithPagination", "Task Description FilterDueDateWithPagination", dueDate, true);
 
+            // Perform GET request with query parameters
+            given()
+                .spec(TestUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
+                .queryParam("dueDate", "2024-06-20T16:02:10Z")
+                .queryParam("page", 0)
+                .queryParam("size", 10)
+                .when()
+                .get(RestAssured.baseURI + TASKS_PATH) // Uses the static variable for the path "/tasks"
+                .then()
+                .statusCode(200)
+                .body("_embedded.tasks[0].title", equalTo("Task to FilterDueDateWithPagination"))
+                .body("_embedded.tasks[0].description", equalTo("Task Description FilterDueDateWithPagination"))
+                .body("_embedded.tasks[0].dueDate", equalTo("2024-06-20T16:02:10Z"))
+                .body("_embedded.tasks[0].completed", equalTo(true));
+        } finally {
+            // Ensure that the inserted task is deleted from the database even if the test fails
+            if (taskIdFilterDueDateWithPag != 0) {
+                DatabaseInsertUtil.deleteTask(taskIdFilterDueDateWithPag);
+            }
+        }
     }
+
     
     
     @Test
     public void testFilterCompletedAndTitleWithPaginationTask() {
-    	
-    	Date dueDate = java.sql.Timestamp.valueOf("2024-06-20 16:12:10");
-        int taskIdFilterCompletedAndTitleWithPag = DatabaseInsertUtil.insertTask("Task to FilterCompletedAndTitle", "Task Description FilterCompletedAndTitle", dueDate, false);
-    	
-    	given()
-        .spec(TestUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
-        .queryParam("completed", "false")
-        .queryParam("title", "Task to FilterCompletedAndTitle")
-        .queryParam("page", 0)
-        .queryParam("size", 10)
-        .when()
-        .get(RestAssured.baseURI + TASKS_PATH) // Uses the static variable for the path "/tasks"
-        .then()
-        .statusCode(200)
-        .body("_embedded.tasks[0].title", equalTo("Task to FilterCompletedAndTitle"))
-        .body("_embedded.tasks[0].description", equalTo("Task Description FilterCompletedAndTitle"))
-        .body("_embedded.tasks[0].dueDate", equalTo("2024-06-20T16:12:10Z"))
-        .body("_embedded.tasks[0].completed", equalTo(false));
-    	
-    	DatabaseInsertUtil.deleteTask(taskIdFilterCompletedAndTitleWithPag);
+        int taskIdFilterCompletedAndTitleWithPag = 0; // Inicialize taskIdFilterCompletedAndTitleWithPag
+        
+        try {
+            // Insert a task into the database
+            Date dueDate = java.sql.Timestamp.valueOf("2024-06-20 16:12:10");
+            taskIdFilterCompletedAndTitleWithPag = DatabaseInsertUtil.insertTask("Task to FilterCompletedAndTitle", "Task Description FilterCompletedAndTitle", dueDate, false);
 
+            // Perform GET request with query parameters
+            given()
+                .spec(TestUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
+                .queryParam("completed", "false")
+                .queryParam("title", "Task to FilterCompletedAndTitle")
+                .queryParam("page", 0)
+                .queryParam("size", 10)
+                .when()
+                .get(RestAssured.baseURI + TASKS_PATH) // Uses the static variable for the path "/tasks"
+                .then()
+                .statusCode(200)
+                .body("_embedded.tasks[0].title", equalTo("Task to FilterCompletedAndTitle"))
+                .body("_embedded.tasks[0].description", equalTo("Task Description FilterCompletedAndTitle"))
+                .body("_embedded.tasks[0].dueDate", equalTo("2024-06-20T16:12:10Z"))
+                .body("_embedded.tasks[0].completed", equalTo(false));
+        } finally {
+            // Ensure that the inserted task is deleted from the database even if the test fails
+            if (taskIdFilterCompletedAndTitleWithPag != 0) {
+                DatabaseInsertUtil.deleteTask(taskIdFilterCompletedAndTitleWithPag);
+            }
+        }
     }
+
     
     @Test
     public void testFilterIdAndTitleAndDescriptionAndDueDateAndCompletedWithPaginationTask() {
-    	
-    	Date dueDate = java.sql.Timestamp.valueOf("2024-06-20 16:21:20");
-        int taskId = DatabaseInsertUtil.insertTask("Task to TitleDescriptionDueDate", "Task Description TitleDescriptionDueDate", dueDate, false);
-    	
-        given()
-            .spec(TestUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
-            .queryParam("taskId", taskId)
-            .queryParam("title", "Task to TitleDescriptionDueDate")
-            .queryParam("description", "Task Description TitleDescriptionDueDate")
-            .queryParam("dueDate", "2024-06-20T16:21:20Z")
-            .queryParam("completed", "false")
-            .queryParam("page", 0)
-            .queryParam("size", 10)
-            .when()
-            .get(RestAssured.baseURI + TASKS_PATH) // Uses the static variable for the path "/tasks"
-            .then()
-            .statusCode(200)
-            .body("_embedded.tasks[0].id", equalTo(taskId))
-            .body("_embedded.tasks[0].title", equalTo("Task to TitleDescriptionDueDate"))
-            .body("_embedded.tasks[0].description", equalTo("Task Description TitleDescriptionDueDate"))
-            .body("_embedded.tasks[0].dueDate", equalTo("2024-06-20T16:21:20Z"))
-            .body("_embedded.tasks[0].completed", equalTo(false));;
+        int taskId = 0; // Inicialize taskId
         
-        DatabaseInsertUtil.deleteTask(taskId);
+        try {
+            // Insert a task into the database
+            Date dueDate = java.sql.Timestamp.valueOf("2024-06-20 16:21:20");
+            taskId = DatabaseInsertUtil.insertTask("Task to TitleDescriptionDueDate", "Task Description TitleDescriptionDueDate", dueDate, false);
+
+            // Perform GET request with query parameters
+            given()
+                .spec(TestUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
+                .queryParam("taskId", taskId)
+                .queryParam("title", "Task to TitleDescriptionDueDate")
+                .queryParam("description", "Task Description TitleDescriptionDueDate")
+                .queryParam("dueDate", "2024-06-20T16:21:20Z")
+                .queryParam("completed", "false")
+                .queryParam("page", 0)
+                .queryParam("size", 10)
+                .when()
+                .get(RestAssured.baseURI + TASKS_PATH) // Uses the static variable for the path "/tasks"
+                .then()
+                .statusCode(200)
+                .body("_embedded.tasks[0].id", equalTo(taskId))
+                .body("_embedded.tasks[0].title", equalTo("Task to TitleDescriptionDueDate"))
+                .body("_embedded.tasks[0].description", equalTo("Task Description TitleDescriptionDueDate"))
+                .body("_embedded.tasks[0].dueDate", equalTo("2024-06-20T16:21:20Z"))
+                .body("_embedded.tasks[0].completed", equalTo(false));
+        } finally {
+            // Ensure that the inserted task is deleted from the database even if the test fails
+            if (taskId != 0) {
+                DatabaseInsertUtil.deleteTask(taskId);
+            }
+        }
     }
+
     
     @Test
     public void testFilterTasksByTitleNoPagination() {
-    	
-    	Date dueDate = java.sql.Timestamp.valueOf("2024-06-20 16:25:35");
-        int taskId = DatabaseInsertUtil.insertTask("Task to FilterTasksByTitleNoPagination", "Task Description FilterTasksByTitleNoPagination", dueDate, false);
+        int taskId = 0; // Inicialize taskId
         
+        try {
+            // Insert a task into the database
+            Date dueDate = java.sql.Timestamp.valueOf("2024-06-20 16:25:35");
+            taskId = DatabaseInsertUtil.insertTask("Task to FilterTasksByTitleNoPagination", "Task Description FilterTasksByTitleNoPagination", dueDate, false);
 
-        // Makes the GET request to fetch tasks filtered by title
-        RestAssured.given()
-            .spec(TestUtil.addTokenHeader(RestAssured.given())) // Adds the authorization header
-            .queryParam("title", "Task to FilterTasksByTitleNoPagination")
-            .when()
-            .get(RestAssured.baseURI + TASKS_PATH + TASKS_PATH_NOPAGINATION)
-            .then()
-            .statusCode(200)
-            .body("_embedded.tasks[0].title", equalTo("Task to FilterTasksByTitleNoPagination")) // Checks if the title of the first task in the result is "Task to FilterTasksByTitleNoPagination"
-            .body("_embedded.tasks[0].description", equalTo("Task Description FilterTasksByTitleNoPagination")) // Checks the description
-            .body("_embedded.tasks[0].dueDate", equalTo("2024-06-20T16:25:35Z")) // Checks the due date
-            .body("_embedded.tasks[0].completed", equalTo(false)) // Checks if it is not completed
-            .body("page", nullValue()); // Checks if the "page" key is not present in the JSON response
-        
-        DatabaseInsertUtil.deleteTask(taskId);
+            // Makes the GET request to fetch tasks filtered by title
+            RestAssured.given()
+                .spec(TestUtil.addTokenHeader(RestAssured.given())) // Adds the authorization header
+                .queryParam("title", "Task to FilterTasksByTitleNoPagination")
+                .when()
+                .get(RestAssured.baseURI + TASKS_PATH + TASKS_PATH_NOPAGINATION)
+                .then()
+                .statusCode(200)
+                .body("_embedded.tasks[0].title", equalTo("Task to FilterTasksByTitleNoPagination")) // Checks if the title of the first task in the result is "Task to FilterTasksByTitleNoPagination"
+                .body("_embedded.tasks[0].description", equalTo("Task Description FilterTasksByTitleNoPagination")) // Checks the description
+                .body("_embedded.tasks[0].dueDate", equalTo("2024-06-20T16:25:35Z")) // Checks the due date
+                .body("_embedded.tasks[0].completed", equalTo(false)) // Checks if it is not completed
+                .body("page", nullValue()); // Checks if the "page" key is not present in the JSON response
+        } finally {
+            // Ensure that the inserted task is deleted from the database even if the test fails
+            if (taskId != 0) {
+                DatabaseInsertUtil.deleteTask(taskId);
+            }
+        }
     }
+
     
     @Test
     public void testCreateTitleMaxCaractereTask() {
