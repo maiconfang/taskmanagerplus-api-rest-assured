@@ -131,7 +131,7 @@ public class TaskApiTest extends BaseTest {
             .body("_embedded.tasks[0].title", equalTo("Task to FilterIdWithPagination"))
             .body("_embedded.tasks[0].description", equalTo("Task Description FilterIdWithPagination"))
             .body("_embedded.tasks[0].dueDate", equalTo("2024-06-20T16:15:20Z"))
-            .body("_embedded.tasks[0].completed", equalTo(false));;
+            .body("_embedded.tasks[0].completed", equalTo(false));
         
         DatabaseInsertUtil.deleteTask(taskIdFilterIdWithPag);
     }

@@ -87,6 +87,71 @@ public class DatabaseInsertUtil {
 
         return false; // Return false by default if deletion fails
     }
+    
+    
+    
+    /**
+     * Inserts a new province into the 'provinces' table and returns the ID of the inserted province.
+     */
+    public static int insertProvince(String name, String abbreviation) {
+        int generatedId = -1;
+        try {
+            // Register the JDBC driver
+            Class.forName(driverClassName);
+
+            // Establish the connection to the database
+            try (Connection connection = DriverManager.getConnection(dbUrl, username, password)) {
+                // Call insertEntity with the new fields
+                generatedId = insertEntity(connection, "province",
+                        "name", name,
+                        "abbreviation", abbreviation);
+                
+                // Print a message if needed
+                // System.out.println("Inserted new province with ID: " + generatedId);
+            }
+        } catch (ClassNotFoundException | SQLException e) {
+            e.printStackTrace();
+        }
+        return generatedId;
+    }
+    
+    
+    /**
+     * Deletes a province from the 'provinces' table based on the given province ID.
+     *
+     * @param provinceId The ID of the province to delete.
+     * @return true if the province was successfully deleted, false otherwise.
+     */
+    public static boolean deleteProvince(int provinceId) {
+        try {
+            // Register the JDBC driver
+            Class.forName(driverClassName);
+
+            // Establish the connection to the database
+            try (Connection connection = DriverManager.getConnection(dbUrl, username, password)) {
+                // Create the SQL statement for deletion
+                String sql = "DELETE FROM province WHERE id = ?";
+
+                // Prepare the statement
+                try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                    // Set the province ID parameter
+                    statement.setInt(1, provinceId);
+
+                    // Execute the delete statement
+                    int rowsDeleted = statement.executeUpdate();
+
+                    // Check if deletion was successful
+                    return rowsDeleted > 0;
+                }
+            }
+        } catch (ClassNotFoundException | SQLException e) {
+            e.printStackTrace();
+        }
+
+        return false; // Return false by default if deletion fails
+    }
+
+
 
     /**
      * Inserts a new entity into the specified table with the given columns and values.
