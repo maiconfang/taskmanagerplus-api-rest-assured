@@ -11,6 +11,14 @@ import java.util.Date;
 
 import com.maif.taskmanagerplus_api_rest_azure.config.ConfigLoader;
 
+/**
+ * Utility class for performing database operations related to tasks.
+ * This class provides methods to insert and delete tasks from the database.
+ * 
+ * Author: Maicon Fang
+ * Date: 2024-06-19
+ */
+
 public class DatabaseInsertUtil {
 
     private static final String dbUrl = ConfigLoader.getDbUrl();

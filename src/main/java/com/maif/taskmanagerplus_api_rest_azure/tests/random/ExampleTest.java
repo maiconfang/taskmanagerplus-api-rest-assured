@@ -10,6 +10,15 @@ import com.maif.taskmanagerplus_api_rest_azure.tests.util.TestUtil;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 
+
+/**
+ * ExampleTest class contains test methods for the Task API endpoints.
+ * This class extends BaseTest to inherit the common setup configuration.
+ * 
+ * Author: Maicon Fang
+ * Date: 2024-06-19
+ */
+
 public class ExampleTest extends BaseTest {
 	
     private static final String TASKS_PATH = "/tasks"; // Static variable for the path "/tasks"
