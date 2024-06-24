@@ -151,7 +151,70 @@ public class DatabaseInsertUtil {
         return false; // Return false by default if deletion fails
     }
 
+    
+    /**
+     * Deletes a user from the 'usserr' table based on the given user ID.
+     *
+     * @param userId The ID of the user to delete.
+     * @return true if the user was successfully deleted, false otherwise.
+     */
+    public static boolean deleteUser(int userId) {
+        try {
+            // Register the JDBC driver
+            Class.forName(driverClassName);
 
+            // Establish the connection to the database
+            try (Connection connection = DriverManager.getConnection(dbUrl, username, password)) {
+                // Create the SQL statement for deletion
+                String sql = "DELETE FROM usserr WHERE id = ?";
+
+                // Prepare the statement
+                try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                    // Set the user ID parameter
+                    statement.setInt(1, userId);
+
+                    // Execute the delete statement
+                    int rowsDeleted = statement.executeUpdate();
+
+                    // Check if deletion was successful
+                    return rowsDeleted > 0;
+                }
+            }
+        } catch (ClassNotFoundException | SQLException e) {
+            e.printStackTrace();
+        }
+
+        return false; // Return false by default if deletion fails
+    }
+
+
+    /**
+     * Inserts a new province into the 'usserr' table and returns the ID of the inserted usserr.
+     */
+    public static int insertUser(String userName, String userEmail, String userPassword, Date dtCreate, Date dtUpdate) {
+        int generatedId = -1;
+        try {
+            // Register the JDBC driver
+            Class.forName(driverClassName);
+
+            // Establish the connection to the database
+            try (Connection connection = DriverManager.getConnection(dbUrl, username, password)) {
+                // Call insertEntity with the new fields
+                generatedId = insertEntity(connection, "usserr",
+                        "name", userName,
+                        "email", userEmail,
+                        "password", userPassword,
+                        "dt_create", dtCreate,
+                        "dt_update", dtUpdate);
+                
+                // Print a message if needed
+                // System.out.println("Inserted new usserr with ID: " + generatedId);
+            }
+        } catch (ClassNotFoundException | SQLException e) {
+            e.printStackTrace();
+        }
+        return generatedId;
+    }
 
     /**
      * Inserts a new entity into the specified table with the given columns and values.
