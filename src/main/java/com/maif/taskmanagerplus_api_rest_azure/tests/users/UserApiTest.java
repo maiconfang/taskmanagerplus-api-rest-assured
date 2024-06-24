@@ -92,18 +92,18 @@ public class UserApiTest extends BaseTest {
         }
     }
     
-    // It will not allow because only the user who created it can change the password.
-    // To succeed, you need to request the token with the newly created user.
     /**
-     * Test to verify user password update.
+     * Test to verify that a user cannot update another user's password.
      * 
-     * This test verifies if the user password update operation is correctly protected
-     * by security permissions. It ensures that only the user who created the account
-     * can successfully change the password.
+     * This test verifies if the operation to update a user's password is correctly
+     * protected by security permissions. It ensures that only the user who created
+     * the account can successfully change the password. The test inserts a user into
+     * the database with specific details and attempts to update the password using
+     * another user's ID. It expects a 403 Forbidden status with a specific error message.
      */
     
     @Test
-    public void testUpdatePasswordUser() {
+    public void testNotUpdatePasswordUser() {
     	int id = 0; // Inicialize
     	Date dtCreate = java.sql.Timestamp.valueOf("2024-06-24 10:00:00");
     	Date dtUpdate = java.sql.Timestamp.valueOf("2024-06-24 10:00:00");

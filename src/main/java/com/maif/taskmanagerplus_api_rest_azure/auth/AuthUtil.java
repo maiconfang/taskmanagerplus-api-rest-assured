@@ -61,4 +61,34 @@ public class AuthUtil {
         // Sets the authorization header for all requests made with RestAssured
         RestAssured.requestSpecification = given().header("Authorization", "Bearer " + token);
     }
+    
+    /**
+     * Authenticates a user with the provided username and password to obtain an access token.
+     * 
+     * This method is used to authenticate a newly created user by exchanging their credentials
+     * for an access token. The token is then stored globally for subsequent API requests.
+     * 
+     * @param username The username of the user to authenticate.
+     * @param password The password of the user to authenticate.
+     */
+    public static void authenticateUser(String email, String password) {
+    	RestAssured.baseURI = "http://localhost:8080/v1";
+        String tokenUrl = "http://localhost:8080/oauth/token";
+
+        Response response = given()
+                .auth().preemptive()
+                .basic("maif-web", "web123")
+                .header("Content-Type", "application/x-www-form-urlencoded")
+                .formParam("username", email)
+                .formParam("password", password)
+                .formParam("grant_type", "password")
+                .when()
+                .post(tokenUrl);
+
+        token = response.jsonPath().getString("access_token");
+
+        // Sets the authorization header for all requests made with RestAssured
+        RestAssured.requestSpecification = given().header("Authorization", "Bearer " + token);
+    }
+
 }
