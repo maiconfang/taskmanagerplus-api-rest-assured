@@ -10,6 +10,9 @@ import java.util.Date;
 
 import org.junit.jupiter.api.Test;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.maif.taskmanagerplus_api_rest_azure.model.TaskDTO;
 import com.maif.taskmanagerplus_api_rest_azure.tests.base.BaseTest;
 import com.maif.taskmanagerplus_api_rest_azure.tests.util.DatabaseInsertUtil;
 import com.maif.taskmanagerplus_api_rest_azure.tests.util.TestUtil;
@@ -34,8 +37,19 @@ public class TaskApiTest extends BaseTest {
     
 
     @Test
-    public void testCreateTask() {
-        String requestBody = "{ \"title\": \"New Task\", \"description\": \"New Task Description\", \"dueDate\": \"2024-06-30T00:00:00Z\", \"completed\": false }";
+    public void testCreateTask() throws JsonProcessingException {
+    	
+    	// Create a TaskDTO object and set its fields
+        TaskDTO taskDTO = new TaskDTO();
+        taskDTO.setTitle("New Task");
+        taskDTO.setDescription("New Task Description");
+        taskDTO.setDueDate("2024-06-30T00:00:00Z");
+        taskDTO.setCompleted(false);
+
+        // Convert the TaskDTO object to JSON
+        ObjectMapper objectMapper = new ObjectMapper();
+        String requestBody = objectMapper.writeValueAsString(taskDTO);
+        
         int taskId = 0; // Inicialize taskId
         
         try {
@@ -409,15 +423,57 @@ public class TaskApiTest extends BaseTest {
     }
 
     
+    /**
+     * Test to verify the response of the "/tasks/hello" endpoint returning "Hello World!".
+     * 
+     * Objective:
+     * - Verify that the API correctly responds with "Hello World!" when accessing the "/tasks/hello" endpoint.
+     * - This test does not require authentication or special permissions as it is a simple test to verify basic API functionality.
+     * 
+     * Corresponding API Method:
+     * - Endpoint: GET "/hello"
+     * - Method: GET
+     * - Returns: "Hello World!"
+     */
     @Test
     public void testHelloWorld() {
         given()
             .when()
             .get(RestAssured.baseURI + "/tasks/hello")
             .then()
-            .statusCode(200)
-            .body(equalTo("Hello World!"));
+            .statusCode(200) // Verifies if the response status code is 200 OK
+            .body(equalTo("Hello World!")); // Verifies if the response body is exactly "Hello World!"
     }
+
+    
+    /**
+     * Test case to verify the behavior when retrieving a non-existent task.
+     * 
+     * Scenario:
+     * - Perform a GET request for a task with a non-existent ID.
+     * - Expect a 404 Not Found response with specific error details.
+     * - Ensure the error response body matches the expected structure.
+     */
+    @Test
+    public void testGetNonExistentTask() {
+        // ID of a task that does not exist in the database
+        Long nonExistentTaskId = 55L;
+
+        // Perform GET request to retrieve the non-existent task
+        given()
+            .spec(TestUtil.addTokenHeader(RestAssured.given())) // Adds the authorization header using a helper method
+            .when()
+            .get(RestAssured.baseURI + TASKS_PATH + "/" + nonExistentTaskId) // Builds the complete URL using RestAssured.baseURI and TASKS_PATH
+            .then()
+            .statusCode(404) // Verifies the response status code is 404 Not Found
+            .body("status", equalTo(404)) // Verifies the "status" field in the response body is 404
+            .body("timestamp", notNullValue()) // Verifies the "timestamp" field is not null
+            .body("type", equalTo("http://localhost:8080/resource-not-found")) // Verifies the "type" field is the expected error type
+            .body("title", equalTo("Resource not found")) // Verifies the "title" field is the expected error title
+            .body("detail", equalTo("There is no register of the task with a code " + nonExistentTaskId)) // Verifies the "detail" field is the expected error detail message
+            .body("userMessage", equalTo("There is no register of the task with a code " + nonExistentTaskId)); // Verifies the "userMessage" field is the expected user-friendly error message
+    }
+
     
 
 }
