@@ -21,7 +21,7 @@ import io.restassured.response.Response;
  * Tests for the Users API endpoints using RestAssured.
  * These tests cover CRUD operations and various filters.
  * 
- * Author: Maicon Fang
+ * Author: Maicon Fang 
  * Date: 2024-06-23
  */
 
