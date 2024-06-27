@@ -445,6 +445,22 @@ public class TaskApiTest extends BaseTest {
             .body(equalTo("Hello World!")); // Verifies if the response body is exactly "Hello World!"
     }
 
+    /**
+     * Test case to demonstrate logging if validation fails using REST Assured.
+     * Documentation based on logging capabilities described in:
+     * https://github.com/rest-assured/rest-assured/wiki/Usage#logging
+     */
+    
+    @Test
+    public void testHelloWorldIfValidationFails() {
+        given()
+            .when()
+            .get(RestAssured.baseURI + "/tasks/hello")
+            .then()
+            .log().ifValidationFails()
+            .statusCode(200) // Verifies if the response status code is 200 OK
+            .body(equalTo("Hello World!")); // Verifies if the response body is exactly "Hello World!"
+    }
     
     /**
      * Test case to verify the behavior when retrieving a non-existent task.
