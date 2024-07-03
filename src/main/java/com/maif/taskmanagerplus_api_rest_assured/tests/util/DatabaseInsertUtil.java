@@ -1,13 +1,14 @@
 package com.maif.taskmanagerplus_api_rest_assured.tests.util;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
-import java.util.Date;
+import java.time.LocalDate;
 
 import com.maif.taskmanagerplus_api_rest_assured.config.ConfigLoader;
 
@@ -29,7 +30,7 @@ public class DatabaseInsertUtil {
     /**
      * Inserts a new task into the 'task' table and returns the ID of the inserted task.
      */
-    public static int insertTask(String title, String description, Date dueDate, boolean completed) {
+    public static int insertTask(String title, String description, LocalDate dueDate, boolean completed) {
         int generatedId = -1;
         try {
             // Register the JDBC driver
@@ -37,11 +38,15 @@ public class DatabaseInsertUtil {
 
             // Establish the connection to the database
             try (Connection connection = DriverManager.getConnection(dbUrl, username, password)) {
+            	
+                // Convert LocalDate to java.sql.Date
+                Date sqlDueDate = Date.valueOf(dueDate);
+            	
                 // Call insertEntity with converted date
                 generatedId = insertEntity(connection, "task", 
                                           "title", title, 
                                           "description", description, 
-                                          "due_date", dueDate, 
+                                          "due_date", sqlDueDate, 
                                           "completed", completed);
 
 //                System.out.println("Inserted new task with ID: " + generatedId);

@@ -6,6 +6,8 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.Matchers.equalTo;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 import org.junit.jupiter.api.Test;
@@ -79,9 +81,7 @@ public class TaskApiTest extends BaseTest {
     public void testDeleteTask() {
     	
     	// Insert a task into the database and get the ID
-    	Date dueDate = java.sql.Timestamp.valueOf("2024-06-30 00:00:00");
-    	 
-        int taskIdNew = DatabaseInsertUtil.insertTask("Task to Delete", "Task Description", dueDate, false);
+        int taskIdNew = DatabaseInsertUtil.insertTask("Task to Delete", "Task Description", TestUtil.convertToLocalDate("2024-06-30"), false);
 
         // Send the deletion request and log the details
         given()
@@ -98,8 +98,7 @@ public class TaskApiTest extends BaseTest {
 
         try {
             // Insert a task into the database
-            Date dueDate = java.sql.Timestamp.valueOf("2024-06-30 00:00:00");
-            taskIdGet = DatabaseInsertUtil.insertTask("Task to Get", "Task Description Get", dueDate, false);
+            taskIdGet = DatabaseInsertUtil.insertTask("Task to Get", "Task Description Get", TestUtil.convertToLocalDate("2024-06-30"), false);
 
             // Perform GET request to retrieve the task
             given()
@@ -124,11 +123,10 @@ public class TaskApiTest extends BaseTest {
         
         try {
             // Insert a task into the database
-            Date dueDate = java.sql.Timestamp.valueOf("2024-06-20 10:00:00");
-            taskIdUpdate = DatabaseInsertUtil.insertTask("Task will be updated", "Task Description will be updated", dueDate, false);
+            taskIdUpdate = DatabaseInsertUtil.insertTask("Task will be updated", "Task Description will be updated", TestUtil.convertToLocalDate("2024-06-20"), false);
             
             // Prepare the request body for updating the task
-            String requestBody = "{ \"id\": " + taskIdUpdate + ", \"title\": \"Updated Task\", \"description\": \"Updated Description\", \"dueDate\": \"2024-07-01T00:00:00Z\", \"completed\": true }";
+            String requestBody = "{ \"id\": " + taskIdUpdate + ", \"title\": \"Updated Task\", \"description\": \"Updated Description\", \"dueDate\": \"2024-07-01\", \"completed\": true }";
 
             // Perform PUT request to update the task
             given()
@@ -155,8 +153,8 @@ public class TaskApiTest extends BaseTest {
         
         try {
             // Insert a task into the database
-            Date dueDate = java.sql.Timestamp.valueOf("2024-06-20 16:15:20");
-            taskIdFilterIdWithPag = DatabaseInsertUtil.insertTask("Task to FilterIdWithPagination", "Task Description FilterIdWithPagination", dueDate, false);
+            taskIdFilterIdWithPag = DatabaseInsertUtil.insertTask("Task to FilterIdWithPagination", "Task Description FilterIdWithPagination", 
+            		TestUtil.convertToLocalDate("2024-06-20"), false);
 
             // Perform GET request with query parameters
             given()
@@ -172,7 +170,7 @@ public class TaskApiTest extends BaseTest {
                 .body("_embedded.tasks[0].id", equalTo(taskIdFilterIdWithPag))
                 .body("_embedded.tasks[0].title", equalTo("Task to FilterIdWithPagination"))
                 .body("_embedded.tasks[0].description", equalTo("Task Description FilterIdWithPagination"))
-                .body("_embedded.tasks[0].dueDate", equalTo("2024-06-20T16:15:20Z"))
+                .body("_embedded.tasks[0].dueDate", equalTo("2024-06-20"))
                 .body("_embedded.tasks[0].completed", equalTo(false));
         } finally {
             // Ensure that the inserted task is deleted from the database even if the test fails
@@ -189,8 +187,8 @@ public class TaskApiTest extends BaseTest {
         
         try {
             // Insert a task into the database
-            Date dueDate = java.sql.Timestamp.valueOf("2024-06-20 15:40:20");
-            taskIdFilterTitleWithPag = DatabaseInsertUtil.insertTask("Task to TitleWithPagination", "Task Description TitleWithPagination", dueDate, false);
+            taskIdFilterTitleWithPag = DatabaseInsertUtil.insertTask("Task to TitleWithPagination", "Task Description TitleWithPagination", 
+            		TestUtil.convertToLocalDate("2024-06-20"), false);
 
             // Perform GET request with query parameters
             given()
@@ -204,7 +202,7 @@ public class TaskApiTest extends BaseTest {
                 .statusCode(200)
                 .body("_embedded.tasks[0].title", equalTo("Task to TitleWithPagination"))
                 .body("_embedded.tasks[0].description", equalTo("Task Description TitleWithPagination"))
-                .body("_embedded.tasks[0].dueDate", equalTo("2024-06-20T15:40:20Z"))
+                .body("_embedded.tasks[0].dueDate", equalTo("2024-06-20"))
                 .body("_embedded.tasks[0].completed", equalTo(false));
         } finally {
             // Ensure that the inserted task is deleted from the database even if the test fails
@@ -221,8 +219,8 @@ public class TaskApiTest extends BaseTest {
         
         try {
             // Insert a task into the database
-            Date dueDate = java.sql.Timestamp.valueOf("2024-06-20 15:48:30");
-            taskIdFilterDescriptionWithPag = DatabaseInsertUtil.insertTask("Task to FilterDescriptionWithPagination", "Task Description FilterDescriptionWithPagination", dueDate, true);
+            taskIdFilterDescriptionWithPag = DatabaseInsertUtil.insertTask("Task to FilterDescriptionWithPagination", 
+            		"Task Description FilterDescriptionWithPagination", TestUtil.convertToLocalDate("2024-06-20"), true);
 
             // Perform GET request with query parameters
             given()
@@ -236,7 +234,7 @@ public class TaskApiTest extends BaseTest {
                 .statusCode(200)
                 .body("_embedded.tasks[0].title", equalTo("Task to FilterDescriptionWithPagination"))
                 .body("_embedded.tasks[0].description", equalTo("Task Description FilterDescriptionWithPagination"))
-                .body("_embedded.tasks[0].dueDate", equalTo("2024-06-20T15:48:30Z"))
+                .body("_embedded.tasks[0].dueDate", equalTo("2024-06-20"))
                 .body("_embedded.tasks[0].completed", equalTo(true));
         } finally {
             // Ensure that the inserted task is deleted from the database even if the test fails
@@ -253,13 +251,13 @@ public class TaskApiTest extends BaseTest {
         
         try {
             // Insert a task into the database
-            Date dueDate = java.sql.Timestamp.valueOf("2024-06-20 16:02:10");
-            taskIdFilterDueDateWithPag = DatabaseInsertUtil.insertTask("Task to FilterDueDateWithPagination", "Task Description FilterDueDateWithPagination", dueDate, true);
+            taskIdFilterDueDateWithPag = DatabaseInsertUtil.insertTask("Task to FilterDueDateWithPagination", "Task Description FilterDueDateWithPagination", 
+            		TestUtil.convertToLocalDate("2024-06-20"), true);
 
             // Perform GET request with query parameters
             given()
                 .spec(TestUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
-                .queryParam("dueDate", "2024-06-20T16:02:10Z")
+                .queryParam("dueDate", "2024-06-20")
                 .queryParam("page", 0)
                 .queryParam("size", 10)
                 .when()
@@ -268,7 +266,7 @@ public class TaskApiTest extends BaseTest {
                 .statusCode(200)
                 .body("_embedded.tasks[0].title", equalTo("Task to FilterDueDateWithPagination"))
                 .body("_embedded.tasks[0].description", equalTo("Task Description FilterDueDateWithPagination"))
-                .body("_embedded.tasks[0].dueDate", equalTo("2024-06-20T16:02:10Z"))
+                .body("_embedded.tasks[0].dueDate", equalTo("2024-06-20"))
                 .body("_embedded.tasks[0].completed", equalTo(true));
         } finally {
             // Ensure that the inserted task is deleted from the database even if the test fails
@@ -286,8 +284,8 @@ public class TaskApiTest extends BaseTest {
         
         try {
             // Insert a task into the database
-            Date dueDate = java.sql.Timestamp.valueOf("2024-06-20 16:12:10");
-            taskIdFilterCompletedAndTitleWithPag = DatabaseInsertUtil.insertTask("Task to FilterCompletedAndTitle", "Task Description FilterCompletedAndTitle", dueDate, false);
+            taskIdFilterCompletedAndTitleWithPag = DatabaseInsertUtil.insertTask("Task to FilterCompletedAndTitle", "Task Description FilterCompletedAndTitle", 
+            		TestUtil.convertToLocalDate("2024-06-20"), false);
 
             // Perform GET request with query parameters
             given()
@@ -302,7 +300,7 @@ public class TaskApiTest extends BaseTest {
                 .statusCode(200)
                 .body("_embedded.tasks[0].title", equalTo("Task to FilterCompletedAndTitle"))
                 .body("_embedded.tasks[0].description", equalTo("Task Description FilterCompletedAndTitle"))
-                .body("_embedded.tasks[0].dueDate", equalTo("2024-06-20T16:12:10Z"))
+                .body("_embedded.tasks[0].dueDate", equalTo("2024-06-20"))
                 .body("_embedded.tasks[0].completed", equalTo(false));
         } finally {
             // Ensure that the inserted task is deleted from the database even if the test fails
@@ -319,8 +317,8 @@ public class TaskApiTest extends BaseTest {
         
         try {
             // Insert a task into the database
-            Date dueDate = java.sql.Timestamp.valueOf("2024-06-20 16:21:20");
-            taskId = DatabaseInsertUtil.insertTask("Task to TitleDescriptionDueDate", "Task Description TitleDescriptionDueDate", dueDate, false);
+            taskId = DatabaseInsertUtil.insertTask("Task to TitleDescriptionDueDate", "Task Description TitleDescriptionDueDate", 
+            		TestUtil.convertToLocalDate("2024-06-20"), false);
 
             // Perform GET request with query parameters
             given()
@@ -328,7 +326,7 @@ public class TaskApiTest extends BaseTest {
                 .queryParam("taskId", taskId)
                 .queryParam("title", "Task to TitleDescriptionDueDate")
                 .queryParam("description", "Task Description TitleDescriptionDueDate")
-                .queryParam("dueDate", "2024-06-20T16:21:20Z")
+                .queryParam("dueDate", "2024-06-20")
                 .queryParam("completed", "false")
                 .queryParam("page", 0)
                 .queryParam("size", 10)
@@ -339,7 +337,7 @@ public class TaskApiTest extends BaseTest {
                 .body("_embedded.tasks[0].id", equalTo(taskId))
                 .body("_embedded.tasks[0].title", equalTo("Task to TitleDescriptionDueDate"))
                 .body("_embedded.tasks[0].description", equalTo("Task Description TitleDescriptionDueDate"))
-                .body("_embedded.tasks[0].dueDate", equalTo("2024-06-20T16:21:20Z"))
+                .body("_embedded.tasks[0].dueDate", equalTo("2024-06-20"))
                 .body("_embedded.tasks[0].completed", equalTo(false));
         } finally {
             // Ensure that the inserted task is deleted from the database even if the test fails
@@ -356,8 +354,8 @@ public class TaskApiTest extends BaseTest {
         
         try {
             // Insert a task into the database
-            Date dueDate = java.sql.Timestamp.valueOf("2024-06-20 16:25:35");
-            taskId = DatabaseInsertUtil.insertTask("Task to FilterTasksByTitleNoPagination", "Task Description FilterTasksByTitleNoPagination", dueDate, false);
+            taskId = DatabaseInsertUtil.insertTask("Task to FilterTasksByTitleNoPagination", "Task Description FilterTasksByTitleNoPagination", 
+            		TestUtil.convertToLocalDate("2024-06-20"), false);
 
             // Makes the GET request to fetch tasks filtered by title
             RestAssured.given()
@@ -369,7 +367,7 @@ public class TaskApiTest extends BaseTest {
                 .statusCode(200)
                 .body("_embedded.tasks[0].title", equalTo("Task to FilterTasksByTitleNoPagination")) // Checks if the title of the first task in the result is "Task to FilterTasksByTitleNoPagination"
                 .body("_embedded.tasks[0].description", equalTo("Task Description FilterTasksByTitleNoPagination")) // Checks the description
-                .body("_embedded.tasks[0].dueDate", equalTo("2024-06-20T16:25:35Z")) // Checks the due date
+                .body("_embedded.tasks[0].dueDate", equalTo("2024-06-20")) // Checks the due date
                 .body("_embedded.tasks[0].completed", equalTo(false)) // Checks if it is not completed
                 .body("page", nullValue()); // Checks if the "page" key is not present in the JSON response
         } finally {

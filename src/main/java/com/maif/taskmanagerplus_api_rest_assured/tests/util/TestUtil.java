@@ -5,6 +5,10 @@ import com.maif.taskmanagerplus_api_rest_assured.auth.AuthUtil;
 
 import io.restassured.specification.RequestSpecification;
 
+import java.sql.Date;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
 /**
  * Adds authorization token and Content-Type header to the given RequestSpecification.
  * The authorization token is fetched using AuthUtil.getAuthToken().
@@ -23,5 +27,15 @@ public class TestUtil {
         return requestSpec
             .header("Authorization", "Bearer " + authToken)
             .header("Content-Type", "application/json");
+    }
+    
+    /**
+     * Converts a date string in "yyyy-MM-dd" format to LocalDate.
+     *
+     * @param dateString The date string in "yyyy-MM-dd" format.
+     * @return LocalDate representing the input date.
+     */
+    public static LocalDate convertToLocalDate(String dateString) {
+        return LocalDate.parse(dateString, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
     }
 }
