@@ -6,7 +6,7 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.equalTo;
 
-import java.util.Date;
+import java.sql.Timestamp;
 
 import org.junit.jupiter.api.Test;
 
@@ -69,9 +69,10 @@ public class UserApiTest extends BaseTest {
     @Test
     public void testUpdateUser() {
     	int id = 0; // Inicialize
-    	Date dtCreate = java.sql.Timestamp.valueOf("2024-06-24 10:00:00");
-    	Date dtUpdate = java.sql.Timestamp.valueOf("2024-06-24 10:00:00");
+    	Timestamp dtCreate = java.sql.Timestamp.valueOf("2024-06-24 10:00:00");
+    	Timestamp dtUpdate = java.sql.Timestamp.valueOf("2024-06-24 10:00:00");
     	String password = "$2y$12$NSsM4gEOR7MKogflKR7GMeYugkttjNhAJMvFdHrBLaLp2HzlggP5W";
+    	
 
         try {
         	id = DatabaseInsertUtil.insertUser("Sophia Jones", "sophia.jones@taskmanagerplus.com", password, dtCreate, dtUpdate);
@@ -105,8 +106,8 @@ public class UserApiTest extends BaseTest {
     @Test
     public void testNotUpdatePasswordUser() {
     	int id = 0; // Inicialize
-    	Date dtCreate = java.sql.Timestamp.valueOf("2024-06-24 10:00:00");
-    	Date dtUpdate = java.sql.Timestamp.valueOf("2024-06-24 10:00:00");
+    	Timestamp dtCreate = java.sql.Timestamp.valueOf("2024-06-24 10:00:00");
+    	Timestamp dtUpdate = java.sql.Timestamp.valueOf("2024-06-24 10:00:00");
     	String passwordFrom = "$2y$12$NSsM4gEOR7MKogflKR7GMeYugkttjNhAJMvFdHrBLaLp2HzlggP5W"; // 123456
     	String passwordTo = "$2a$12$ycxvFmxrGBiz5bPsmUzPH.03wwqmKTLME966YaMrhoucpQ3Dsmn9e"; //654321 
 
@@ -146,8 +147,8 @@ public class UserApiTest extends BaseTest {
     public void testFilterUsersByName() {
         int id = 0;
         
-    	Date dtCreate = java.sql.Timestamp.valueOf("2024-06-24 10:00:00");
-    	Date dtUpdate = java.sql.Timestamp.valueOf("2024-06-24 10:00:00");
+        Timestamp dtCreate = java.sql.Timestamp.valueOf("2024-06-24 10:00:00");
+        Timestamp dtUpdate = java.sql.Timestamp.valueOf("2024-06-24 10:00:00");
     	String password = "$2y$12$NSsM4gEOR7MKogflKR7GMeYugkttjNhAJMvFdHrBLaLp2HzlggP5W";
         
         try {
@@ -186,8 +187,8 @@ public class UserApiTest extends BaseTest {
     public void testFilterUsersByEmail() {
         int id = 0;
         
-    	Date dtCreate = java.sql.Timestamp.valueOf("2024-06-24 10:00:00");
-    	Date dtUpdate = java.sql.Timestamp.valueOf("2024-06-24 10:00:00");
+        Timestamp dtCreate = java.sql.Timestamp.valueOf("2024-06-24 10:00:00");
+        Timestamp dtUpdate = java.sql.Timestamp.valueOf("2024-06-24 10:00:00");
     	String password = "$2y$12$NSsM4gEOR7MKogflKR7GMeYugkttjNhAJMvFdHrBLaLp2HzlggP5W";
         
         try {
@@ -229,8 +230,8 @@ public class UserApiTest extends BaseTest {
     public void testFilterUsersByNameAndEmail() {
         int id = 0;
         
-    	Date dtCreate = java.sql.Timestamp.valueOf("2024-06-24 10:00:00");
-    	Date dtUpdate = java.sql.Timestamp.valueOf("2024-06-24 10:00:00");
+        Timestamp dtCreate = java.sql.Timestamp.valueOf("2024-06-24 10:00:00");
+        Timestamp dtUpdate = java.sql.Timestamp.valueOf("2024-06-24 10:00:00");
     	String password = "$2y$12$NSsM4gEOR7MKogflKR7GMeYugkttjNhAJMvFdHrBLaLp2HzlggP5W";
         
         try {

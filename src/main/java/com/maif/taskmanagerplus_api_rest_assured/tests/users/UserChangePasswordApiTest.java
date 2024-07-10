@@ -4,7 +4,7 @@ package com.maif.taskmanagerplus_api_rest_assured.tests.users;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 
-import java.util.Date;
+import java.sql.Timestamp;
 
 import com.maif.taskmanagerplus_api_rest_assured.auth.AuthUtil;
 import com.maif.taskmanagerplus_api_rest_assured.tests.util.DatabaseInsertUtil;
@@ -41,8 +41,8 @@ public class UserChangePasswordApiTest {
 //    @Test
     public void testUpdatePasswordUser() {
     	int id = 0; // Inicialize
-    	Date dtCreate = java.sql.Timestamp.valueOf("2024-06-24 10:00:00");
-    	Date dtUpdate = java.sql.Timestamp.valueOf("2024-06-24 10:00:00");
+    	Timestamp dtCreate = java.sql.Timestamp.valueOf("2024-06-24 10:00:00");
+    	Timestamp dtUpdate = java.sql.Timestamp.valueOf("2024-06-24 10:00:00");
     	
     	String passwordFrom = "$2a$12$RZe45hE/QygoOhK80mo5lOrbn1MVYOrv0lMyacIEI4rufXnKn1D.G"; // 123456
     	String passwordCurrent = "123456";

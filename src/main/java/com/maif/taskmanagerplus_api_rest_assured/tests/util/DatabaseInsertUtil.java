@@ -194,9 +194,9 @@ public class DatabaseInsertUtil {
 
 
     /**
-     * Inserts a new province into the 'usserr' table and returns the ID of the inserted usserr.
+     * Inserts a new user into the 'usserr' table and returns the ID of the inserted usserr.
      */
-    public static int insertUser(String userName, String userEmail, String userPassword, Date dtCreate, Date dtUpdate) {
+    public static int insertUser(String userName, String userEmail, String userPassword, Timestamp dtCreate, Timestamp dtUpdate) {
         int generatedId = -1;
         try {
             // Register the JDBC driver

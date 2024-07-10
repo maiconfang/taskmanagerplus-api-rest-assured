@@ -1,13 +1,12 @@
 package com.maif.taskmanagerplus_api_rest_assured.tests.util;
 
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
 import com.maif.taskmanagerplus_api_rest_assured.auth.AuthUtil;
 
 import io.restassured.specification.RequestSpecification;
-
-import java.sql.Date;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 
 /**
  * Adds authorization token and Content-Type header to the given RequestSpecification.

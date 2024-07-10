@@ -6,10 +6,6 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.Matchers.equalTo;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.Date;
-
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -20,7 +16,6 @@ import com.maif.taskmanagerplus_api_rest_assured.tests.util.DatabaseInsertUtil;
 import com.maif.taskmanagerplus_api_rest_assured.tests.util.TestUtil;
 
 import io.restassured.RestAssured;
-
 import io.restassured.response.Response;
 
 
