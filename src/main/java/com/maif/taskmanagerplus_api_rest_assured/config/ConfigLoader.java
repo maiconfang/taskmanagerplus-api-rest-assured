@@ -48,6 +48,16 @@ public class ConfigLoader {
             // Handle exception (e.g., throw an exception or set default values)
         }
     }
+    
+    /**
+     * Generic method to retrieve any property by key from the loaded properties.
+     * 
+     * @param key The key of the property to retrieve
+     * @return The value of the property
+     */
+    public static String getProperty(String key) {
+        return properties.getProperty(key);
+    }
 
     /**
      * Retrieves the database URL from the loaded properties.
