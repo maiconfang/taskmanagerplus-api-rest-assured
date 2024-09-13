@@ -11,7 +11,7 @@ import java.sql.Timestamp;
 import org.junit.jupiter.api.Test;
 
 import com.maif.taskmanagerplus_api_rest_assured.tests.base.BaseTest;
-import com.maif.taskmanagerplus_api_rest_assured.tests.util.DatabaseInsertUtil;
+import com.maif.taskmanagerplus_api_rest_assured.tests.util.DataBaseInsertUtil;
 import com.maif.taskmanagerplus_api_rest_assured.tests.util.TestUtil;
 
 import io.restassured.RestAssured;
@@ -35,7 +35,7 @@ public class UserApiTest extends BaseTest {
      * It validates if the province is successfully created and checks its details.
      */
     @Test
-    public void testCreateUser() {
+    public void shouldCreateNewUserSuccessfully() {
         int id = -1; // Variable to store the ID of the created user
 
         try {
@@ -57,7 +57,7 @@ public class UserApiTest extends BaseTest {
         } finally {
             // Ensure the user is deleted even if the test fails
             if (id != -1) {
-                DatabaseInsertUtil.deleteUser(id);
+                DataBaseInsertUtil.deleteUser(id);
             }
         }
     }
@@ -67,7 +67,7 @@ public class UserApiTest extends BaseTest {
      * It validates if the user is successfully updated with new details.
      */
     @Test
-    public void testUpdateUser() {
+    public void shouldUpdateUserDetailsSuccessfully() {
     	int id = 0; // Inicialize
     	Timestamp dtCreate = java.sql.Timestamp.valueOf("2024-06-24 10:00:00");
     	Timestamp dtUpdate = java.sql.Timestamp.valueOf("2024-06-24 10:00:00");
@@ -75,7 +75,7 @@ public class UserApiTest extends BaseTest {
     	
 
         try {
-        	id = DatabaseInsertUtil.insertUser("Sophia Jones", "sophia.jones@taskmanagerplus.com", password, dtCreate, dtUpdate);
+        	id = DataBaseInsertUtil.insertUser("Sophia Jones", "sophia.jones@taskmanagerplus.com", password, dtCreate, dtUpdate);
         	String requestBody = "{ \"id\": " + id + ", \"name\": \"Sophia Jones Updated\", \"email\": \"sophia.jones.mf@taskmanagerplus.com\"}";
 
             given()
@@ -89,7 +89,7 @@ public class UserApiTest extends BaseTest {
                 .body("email", equalTo("sophia.jones.mf@taskmanagerplus.com"));
         } finally {
             // Ensure the province is deleted even if the test fails
-        	DatabaseInsertUtil.deleteUser(id);
+        	DataBaseInsertUtil.deleteUser(id);
         }
     }
     
@@ -104,7 +104,7 @@ public class UserApiTest extends BaseTest {
      */
     
     @Test
-    public void testNotUpdatePasswordUser() {
+    public void shouldNotAllowPasswordUpdateByAnotherUser() {
     	int id = 0; // Inicialize
     	Timestamp dtCreate = java.sql.Timestamp.valueOf("2024-06-24 10:00:00");
     	Timestamp dtUpdate = java.sql.Timestamp.valueOf("2024-06-24 10:00:00");
@@ -112,7 +112,7 @@ public class UserApiTest extends BaseTest {
     	String passwordTo = "$2a$12$ycxvFmxrGBiz5bPsmUzPH.03wwqmKTLME966YaMrhoucpQ3Dsmn9e"; //654321 
 
         try {
-        	id = DatabaseInsertUtil.insertUser("Sophia Jones", "sophia.jones@taskmanagerplus.com", passwordFrom, dtCreate, dtUpdate);
+        	id = DataBaseInsertUtil.insertUser("Sophia Jones", "sophia.jones@taskmanagerplus.com", passwordFrom, dtCreate, dtUpdate);
         	
         	String requestBody = "{ \"currentPassword\": \"" + passwordFrom + "\", \"newPassword\": \"" + passwordTo + "\" }";
 
@@ -130,7 +130,7 @@ public class UserApiTest extends BaseTest {
                 .body("userMessage", equalTo("You do not have permission to perform this operation."));
         } finally {
             // Ensure the province is deleted even if the test fails
-        	DatabaseInsertUtil.deleteUser(id);
+        	DataBaseInsertUtil.deleteUser(id);
         }
     }
     
@@ -144,7 +144,7 @@ public class UserApiTest extends BaseTest {
      */
     
     @Test
-    public void testFilterUsersByName() {
+    public void shouldFilterUsersByNameSuccessfully() {
         int id = 0;
         
         Timestamp dtCreate = java.sql.Timestamp.valueOf("2024-06-24 10:00:00");
@@ -153,7 +153,7 @@ public class UserApiTest extends BaseTest {
         
         try {
             // Insert a user into the database
-            id = DatabaseInsertUtil.insertUser("Charlotte Brown", "charlotte.brown@taskmanagerplus.com", password, dtCreate, dtUpdate);
+            id = DataBaseInsertUtil.insertUser("Charlotte Brown", "charlotte.brown@taskmanagerplus.com", password, dtCreate, dtUpdate);
 
             // Makes the GET request to fetch user filtered by name
             RestAssured.given()
@@ -169,7 +169,7 @@ public class UserApiTest extends BaseTest {
         } finally {
             // Ensure that the inserted user is deleted from the database even if the test fails
             if (id != 0) {
-                DatabaseInsertUtil.deleteUser(id);
+                DataBaseInsertUtil.deleteUser(id);
             }
         }
     }
@@ -184,7 +184,7 @@ public class UserApiTest extends BaseTest {
      */
     
     @Test
-    public void testFilterUsersByEmail() {
+    public void shouldFilterUsersByEmailSuccessfully() {
         int id = 0;
         
         Timestamp dtCreate = java.sql.Timestamp.valueOf("2024-06-24 10:00:00");
@@ -193,7 +193,7 @@ public class UserApiTest extends BaseTest {
         
         try {
             // Insert a user into the database
-            id = DatabaseInsertUtil.insertUser("Olivia Miller", "olivia.miller@taskmanagerplus.com", password, dtCreate, dtUpdate);
+            id = DataBaseInsertUtil.insertUser("Olivia Miller", "olivia.miller@taskmanagerplus.com", password, dtCreate, dtUpdate);
 
             // Makes the GET request to fetch user filtered by email
             RestAssured.given()
@@ -209,7 +209,7 @@ public class UserApiTest extends BaseTest {
         } finally {
             // Ensure that the inserted user is deleted from the database even if the test fails
             if (id != 0) {
-                DatabaseInsertUtil.deleteUser(id);
+                DataBaseInsertUtil.deleteUser(id);
             }
         }
     }
@@ -227,7 +227,7 @@ public class UserApiTest extends BaseTest {
 
     
     @Test
-    public void testFilterUsersByNameAndEmail() {
+    public void shouldFilterUsersByNameAndEmailSuccessfully() {
         int id = 0;
         
         Timestamp dtCreate = java.sql.Timestamp.valueOf("2024-06-24 10:00:00");
@@ -236,7 +236,7 @@ public class UserApiTest extends BaseTest {
         
         try {
             // Insert a user into the database
-            id = DatabaseInsertUtil.insertUser("Leo Johnson", "leo.johnson@taskmanagerplus.com", password, dtCreate, dtUpdate);
+            id = DataBaseInsertUtil.insertUser("Leo Johnson", "leo.johnson@taskmanagerplus.com", password, dtCreate, dtUpdate);
 
             // Makes the GET request to fetch user filtered by name
             RestAssured.given()
@@ -253,7 +253,7 @@ public class UserApiTest extends BaseTest {
         } finally {
             // Ensure that the inserted user is deleted from the database even if the test fails
             if (id != 0) {
-                DatabaseInsertUtil.deleteUser(id);
+                DataBaseInsertUtil.deleteUser(id);
             }
         }
     }

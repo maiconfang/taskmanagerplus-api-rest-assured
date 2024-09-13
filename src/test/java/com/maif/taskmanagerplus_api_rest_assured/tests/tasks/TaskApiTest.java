@@ -12,7 +12,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.maif.taskmanagerplus_api_rest_assured.model.TaskDTO;
 import com.maif.taskmanagerplus_api_rest_assured.tests.base.BaseTest;
-import com.maif.taskmanagerplus_api_rest_assured.tests.util.DatabaseInsertUtil;
+import com.maif.taskmanagerplus_api_rest_assured.tests.util.DataBaseInsertUtil;
 import com.maif.taskmanagerplus_api_rest_assured.tests.util.TestUtil;
 
 import io.restassured.RestAssured;
@@ -34,7 +34,7 @@ public class TaskApiTest extends BaseTest {
     
 
     @Test
-    public void testCreateTask() throws JsonProcessingException {
+    public void shouldCreateNewTaskSuccessfully() throws JsonProcessingException {
     	
     	// Create a TaskDTO object and set its fields
         TaskDTO taskDTO = new TaskDTO();
@@ -66,17 +66,17 @@ public class TaskApiTest extends BaseTest {
         } finally {
             // Ensure that the created task is deleted from the database even if the test fails
             if (taskId != 0) {
-                DatabaseInsertUtil.deleteTask(taskId);
+                DataBaseInsertUtil.deleteTask(taskId);
             }
         }
     }
 
     
     @Test
-    public void testDeleteTask() {
+    public void shouldDeleteExistingTaskSuccessfully() {
     	
     	// Insert a task into the database and get the ID
-        int taskIdNew = DatabaseInsertUtil.insertTask("Task to Delete", "Task Description", TestUtil.convertToLocalDate("2024-06-30"), false);
+        int taskIdNew = DataBaseInsertUtil.insertTask("Task to Delete", "Task Description", TestUtil.convertToLocalDate("2024-06-30"), false);
 
         // Send the deletion request and log the details
         given()
@@ -88,12 +88,12 @@ public class TaskApiTest extends BaseTest {
     }
     
     @Test
-    public void testGetTask() {
+    public void shouldRetrieveTaskById() {
         int taskIdGet = 0; // Inicialize taskIdGet
 
         try {
             // Insert a task into the database
-            taskIdGet = DatabaseInsertUtil.insertTask("Task to Get", "Task Description Get", TestUtil.convertToLocalDate("2024-06-30"), false);
+            taskIdGet = DataBaseInsertUtil.insertTask("Task to Get", "Task Description Get", TestUtil.convertToLocalDate("2024-06-30"), false);
 
             // Perform GET request to retrieve the task
             given()
@@ -106,19 +106,19 @@ public class TaskApiTest extends BaseTest {
         } finally {
             // Ensure that the inserted task is deleted from the database even if the test fails
             if (taskIdGet != 0) {
-                DatabaseInsertUtil.deleteTask(taskIdGet);
+                DataBaseInsertUtil.deleteTask(taskIdGet);
             }
         }
     }
 
     
     @Test
-    public void testUpdateTask() {
+    public void shouldUpdateTaskDetailsSuccessfully() {
         int taskIdUpdate = 0; // Inicialize taskIdUpdate
         
         try {
             // Insert a task into the database
-            taskIdUpdate = DatabaseInsertUtil.insertTask("Task will be updated", "Task Description will be updated", TestUtil.convertToLocalDate("2024-06-20"), false);
+            taskIdUpdate = DataBaseInsertUtil.insertTask("Task will be updated", "Task Description will be updated", TestUtil.convertToLocalDate("2024-06-20"), false);
             
             // Prepare the request body for updating the task
             String requestBody = "{ \"id\": " + taskIdUpdate + ", \"title\": \"Updated Task\", \"description\": \"Updated Description\", \"dueDate\": \"2024-07-01\", \"completed\": true }";
@@ -135,7 +135,7 @@ public class TaskApiTest extends BaseTest {
         } finally {
             // Ensure that the updated task is deleted from the database even if the test fails
             if (taskIdUpdate != 0) {
-                DatabaseInsertUtil.deleteTask(taskIdUpdate);
+                DataBaseInsertUtil.deleteTask(taskIdUpdate);
             }
         }
     }
@@ -143,12 +143,12 @@ public class TaskApiTest extends BaseTest {
     
     
     @Test
-    public void testFilterIdWithPaginationTask() {
+    public void shouldFilterTasksByIdWithPagination() {
         int taskIdFilterIdWithPag = 0; // Inicialize taskIdFilterIdWithPag
         
         try {
             // Insert a task into the database
-            taskIdFilterIdWithPag = DatabaseInsertUtil.insertTask("Task to FilterIdWithPagination", "Task Description FilterIdWithPagination", 
+            taskIdFilterIdWithPag = DataBaseInsertUtil.insertTask("Task to FilterIdWithPagination", "Task Description FilterIdWithPagination", 
             		TestUtil.convertToLocalDate("2024-06-20"), false);
 
             // Perform GET request with query parameters
@@ -170,19 +170,19 @@ public class TaskApiTest extends BaseTest {
         } finally {
             // Ensure that the inserted task is deleted from the database even if the test fails
             if (taskIdFilterIdWithPag != 0) {
-                DatabaseInsertUtil.deleteTask(taskIdFilterIdWithPag);
+                DataBaseInsertUtil.deleteTask(taskIdFilterIdWithPag);
             }
         }
     }
 
     
     @Test
-    public void testFilterTitleWithPaginationTask() {
+    public void shouldFilterTasksByTitleWithPagination() {
         int taskIdFilterTitleWithPag = 0; // Inicialize taskIdFilterTitleWithPag
         
         try {
             // Insert a task into the database
-            taskIdFilterTitleWithPag = DatabaseInsertUtil.insertTask("Task to TitleWithPagination", "Task Description TitleWithPagination", 
+            taskIdFilterTitleWithPag = DataBaseInsertUtil.insertTask("Task to TitleWithPagination", "Task Description TitleWithPagination", 
             		TestUtil.convertToLocalDate("2024-06-20"), false);
 
             // Perform GET request with query parameters
@@ -202,19 +202,19 @@ public class TaskApiTest extends BaseTest {
         } finally {
             // Ensure that the inserted task is deleted from the database even if the test fails
             if (taskIdFilterTitleWithPag != 0) {
-                DatabaseInsertUtil.deleteTask(taskIdFilterTitleWithPag);
+                DataBaseInsertUtil.deleteTask(taskIdFilterTitleWithPag);
             }
         }
     }
 
     
     @Test
-    public void testFilterDescriptionWithPaginationTask() {
+    public void shouldFilterTasksByDescriptionWithPagination() {
         int taskIdFilterDescriptionWithPag = 0; // Inicialize taskIdFilterDescriptionWithPag
         
         try {
             // Insert a task into the database
-            taskIdFilterDescriptionWithPag = DatabaseInsertUtil.insertTask("Task to FilterDescriptionWithPagination", 
+            taskIdFilterDescriptionWithPag = DataBaseInsertUtil.insertTask("Task to FilterDescriptionWithPagination", 
             		"Task Description FilterDescriptionWithPagination", TestUtil.convertToLocalDate("2024-06-20"), true);
 
             // Perform GET request with query parameters
@@ -234,19 +234,19 @@ public class TaskApiTest extends BaseTest {
         } finally {
             // Ensure that the inserted task is deleted from the database even if the test fails
             if (taskIdFilterDescriptionWithPag != 0) {
-                DatabaseInsertUtil.deleteTask(taskIdFilterDescriptionWithPag);
+                DataBaseInsertUtil.deleteTask(taskIdFilterDescriptionWithPag);
             }
         }
     }
 
     
     @Test
-    public void testFilterDueDateWithPaginationTask() {
+    public void shouldFilterTasksByDueDateWithPagination() {
         int taskIdFilterDueDateWithPag = 0; // Inicialize taskIdFilterDueDateWithPag
         
         try {
             // Insert a task into the database
-            taskIdFilterDueDateWithPag = DatabaseInsertUtil.insertTask("Task to FilterDueDateWithPagination", "Task Description FilterDueDateWithPagination", 
+            taskIdFilterDueDateWithPag = DataBaseInsertUtil.insertTask("Task to FilterDueDateWithPagination", "Task Description FilterDueDateWithPagination", 
             		TestUtil.convertToLocalDate("2024-06-20"), true);
 
             // Perform GET request with query parameters
@@ -266,7 +266,7 @@ public class TaskApiTest extends BaseTest {
         } finally {
             // Ensure that the inserted task is deleted from the database even if the test fails
             if (taskIdFilterDueDateWithPag != 0) {
-                DatabaseInsertUtil.deleteTask(taskIdFilterDueDateWithPag);
+                DataBaseInsertUtil.deleteTask(taskIdFilterDueDateWithPag);
             }
         }
     }
@@ -274,12 +274,12 @@ public class TaskApiTest extends BaseTest {
     
     
     @Test
-    public void testFilterCompletedAndTitleWithPaginationTask() {
+    public void shouldFilterTasksByCompletedStatusAndTitleWithPagination() {
         int taskIdFilterCompletedAndTitleWithPag = 0; // Inicialize taskIdFilterCompletedAndTitleWithPag
         
         try {
             // Insert a task into the database
-            taskIdFilterCompletedAndTitleWithPag = DatabaseInsertUtil.insertTask("Task to FilterCompletedAndTitle", "Task Description FilterCompletedAndTitle", 
+            taskIdFilterCompletedAndTitleWithPag = DataBaseInsertUtil.insertTask("Task to FilterCompletedAndTitle", "Task Description FilterCompletedAndTitle", 
             		TestUtil.convertToLocalDate("2024-06-20"), false);
 
             // Perform GET request with query parameters
@@ -300,19 +300,19 @@ public class TaskApiTest extends BaseTest {
         } finally {
             // Ensure that the inserted task is deleted from the database even if the test fails
             if (taskIdFilterCompletedAndTitleWithPag != 0) {
-                DatabaseInsertUtil.deleteTask(taskIdFilterCompletedAndTitleWithPag);
+                DataBaseInsertUtil.deleteTask(taskIdFilterCompletedAndTitleWithPag);
             }
         }
     }
 
     
     @Test
-    public void testFilterIdAndTitleAndDescriptionAndDueDateAndCompletedWithPaginationTask() {
+    public void shouldFilterTasksByMultipleCriteriaWithPagination() {
         int taskId = 0; // Inicialize taskId
         
         try {
             // Insert a task into the database
-            taskId = DatabaseInsertUtil.insertTask("Task to TitleDescriptionDueDate", "Task Description TitleDescriptionDueDate", 
+            taskId = DataBaseInsertUtil.insertTask("Task to TitleDescriptionDueDate", "Task Description TitleDescriptionDueDate", 
             		TestUtil.convertToLocalDate("2024-06-20"), false);
 
             // Perform GET request with query parameters
@@ -337,19 +337,19 @@ public class TaskApiTest extends BaseTest {
         } finally {
             // Ensure that the inserted task is deleted from the database even if the test fails
             if (taskId != 0) {
-                DatabaseInsertUtil.deleteTask(taskId);
+                DataBaseInsertUtil.deleteTask(taskId);
             }
         }
     }
 
     
     @Test
-    public void testFilterTasksByTitleNoPagination() {
+    public void shouldFilterTasksByTitleWithoutPagination() {
         int taskId = 0; // Inicialize taskId
         
         try {
             // Insert a task into the database
-            taskId = DatabaseInsertUtil.insertTask("Task to FilterTasksByTitleNoPagination", "Task Description FilterTasksByTitleNoPagination", 
+            taskId = DataBaseInsertUtil.insertTask("Task to FilterTasksByTitleNoPagination", "Task Description FilterTasksByTitleNoPagination", 
             		TestUtil.convertToLocalDate("2024-06-20"), false);
 
             // Makes the GET request to fetch tasks filtered by title
@@ -368,14 +368,14 @@ public class TaskApiTest extends BaseTest {
         } finally {
             // Ensure that the inserted task is deleted from the database even if the test fails
             if (taskId != 0) {
-                DatabaseInsertUtil.deleteTask(taskId);
+                DataBaseInsertUtil.deleteTask(taskId);
             }
         }
     }
 
     
     @Test
-    public void testCreateTitleMaxCaractereTask() {
+    public void shouldReturnErrorForTitleExceedingMaxLength() {
     	String textTitle = "A simple task management system that allows users to create, update, delete, and mark tasks as completed. A simple task management system that "
     			+ "allows users to create, update, delete, and mark tasks as completed. A simple task management system that allows u";
     	String requestBody = "{ \"title\": \"" + textTitle + "\", \"description\": \"New Task Description\", \"dueDate\": \"2024-06-30T00:00:00Z\", \"completed\": false }";
@@ -397,7 +397,7 @@ public class TaskApiTest extends BaseTest {
     
     
     @Test
-    public void testCreateDuoDateInvalidTask() {
+    public void shouldReturnErrorForInvalidDueDateFormat() {
     	  String requestBody = "{ \"title\": \"New Task\", \"description\": \"New Task Description\", \"dueDate\": \"hii2024-06-30T00:00:00Z\", \"completed\": false }";
 
     	  given()
@@ -429,7 +429,7 @@ public class TaskApiTest extends BaseTest {
      * - Returns: "Hello World!"
      */
     @Test
-    public void testHelloWorld() {
+    public void shouldReturnHelloWorldMessage() {
         given()
             .when()
             .get(RestAssured.baseURI + "/tasks/hello")
@@ -445,7 +445,7 @@ public class TaskApiTest extends BaseTest {
      */
     
     @Test
-    public void testHelloWorldIfValidationFails() {
+    public void shouldLogErrorIfValidationFailsForHelloWorld() {
         given()
             .when()
             .get(RestAssured.baseURI + "/tasks/hello")
@@ -464,7 +464,7 @@ public class TaskApiTest extends BaseTest {
      * - Ensure the error response body matches the expected structure.
      */
     @Test
-    public void testGetNonExistentTask() {
+    public void shouldReturn404ForNonExistentTask() {
         // ID of a task that does not exist in the database
         Long nonExistentTaskId = 55L;
 

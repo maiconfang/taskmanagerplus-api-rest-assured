@@ -20,7 +20,7 @@ import com.maif.taskmanagerplus_api_rest_assured.config.ConfigLoader;
  * Date: 2024-06-19
  */
 
-public class DatabaseInsertUtil {
+public class DataBaseInsertUtil {
 
     private static final String dbUrl = ConfigLoader.getDbUrl();
     private static final String username = ConfigLoader.getUsername();

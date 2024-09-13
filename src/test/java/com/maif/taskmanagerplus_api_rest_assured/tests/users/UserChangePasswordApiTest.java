@@ -7,7 +7,7 @@ import static org.hamcrest.Matchers.equalTo;
 import java.sql.Timestamp;
 
 import com.maif.taskmanagerplus_api_rest_assured.auth.AuthUtil;
-import com.maif.taskmanagerplus_api_rest_assured.tests.util.DatabaseInsertUtil;
+import com.maif.taskmanagerplus_api_rest_assured.tests.util.DataBaseInsertUtil;
 import com.maif.taskmanagerplus_api_rest_assured.tests.util.TestUtil;
 
 import io.restassured.RestAssured;
@@ -39,7 +39,7 @@ public class UserChangePasswordApiTest {
      */
     
 //    @Test
-    public void testUpdatePasswordUser() {
+    public void shouldUpdateUserPasswordSuccessfully() {
     	int id = 0; // Inicialize
     	Timestamp dtCreate = java.sql.Timestamp.valueOf("2024-06-24 10:00:00");
     	Timestamp dtUpdate = java.sql.Timestamp.valueOf("2024-06-24 10:00:00");
@@ -49,7 +49,7 @@ public class UserChangePasswordApiTest {
     	String passwordTo = "$2a$12$ZMoq9AiXZZdIBsqyL6HGpu299rO9kchJy2CGcwwntyZGQKH.PqZqO"; //654321 
 
         try {
-        	id = DatabaseInsertUtil.insertUser("Sophia Jones", "sophia.jones@taskmanagerplus.com", passwordFrom, dtCreate, dtUpdate);
+        	id = DataBaseInsertUtil.insertUser("Sophia Jones", "sophia.jones@taskmanagerplus.com", passwordFrom, dtCreate, dtUpdate);
         	
         	AuthUtil.authenticateUser("sophia.jones@taskmanagerplus.com", "123456");
         	
@@ -64,7 +64,7 @@ public class UserChangePasswordApiTest {
                 .body("status", equalTo(204));
         } finally {
             // Ensure the province is deleted even if the test fails
-        	DatabaseInsertUtil.deleteUser(id);
+        	DataBaseInsertUtil.deleteUser(id);
         }
     }
     
