@@ -13,7 +13,6 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<junit.jupiter.version>5.7.0</junit.jupiter.version>
 		<rest.assured.version>5.4.0</rest.assured.version>
 	</properties>
 
