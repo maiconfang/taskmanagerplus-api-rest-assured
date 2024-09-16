@@ -44,8 +44,8 @@ public class UserChangePasswordApiTest {
     	Timestamp dtUpdate = java.sql.Timestamp.valueOf("2024-06-24 10:00:00");
     	
     	String passwordFrom = "$2a$12$RZe45hE/QygoOhK80mo5lOrbn1MVYOrv0lMyacIEI4rufXnKn1D.G"; // 123456
-    	String passwordCurrent = "123456";
-    	String passwordTo = "$2a$12$ZMoq9AiXZZdIBsqyL6HGpu299rO9kchJy2CGcwwntyZGQKH.PqZqO"; //654321 
+//    	String passwordCurrent = "123456";
+//    	String passwordTo = "$2a$12$ZMoq9AiXZZdIBsqyL6HGpu299rO9kchJy2CGcwwntyZGQKH.PqZqO"; //654321 
 
         try {
         	id = DataBaseInsertUtil.insertUser("Sophia Jones", "sophia.jones@taskmanagerplus.com", passwordFrom, dtCreate, dtUpdate);
