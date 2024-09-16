@@ -8,7 +8,6 @@ import java.sql.Timestamp;
 
 import com.maif.taskmanagerplus_api_rest_assured.auth.AuthUtil;
 import com.maif.taskmanagerplus_api_rest_assured.tests.util.DataBaseInsertUtil;
-import com.maif.taskmanagerplus_api_rest_assured.tests.util.TestUtil;
 
 import io.restassured.RestAssured;
 
@@ -56,7 +55,7 @@ public class UserChangePasswordApiTest {
         	String requestBody = "{ \"currentPassword\": \"$2a$12$RZe45hE/QygoOhK80mo5lOrbn1MVYOrv0lMyacIEI4rufXnKn1D.G\", \"newPassword\": \"654321\" }";
 
             given()
-                .spec(TestUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
+                .spec(AuthUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
                 .body(requestBody)
                 .when()
                 .put(RestAssured.baseURI + USERS_PATH + "/" + id + PASSWORD_PATH ) // Builds the complete URL using RestAssured.baseURI and USERS_PATH

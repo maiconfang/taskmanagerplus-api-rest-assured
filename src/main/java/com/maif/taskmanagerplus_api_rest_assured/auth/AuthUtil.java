@@ -1,6 +1,8 @@
 package com.maif.taskmanagerplus_api_rest_assured.auth;
 
 import io.restassured.response.Response;
+import io.restassured.specification.RequestSpecification;
+
 import static io.restassured.RestAssured.given;
 import io.restassured.RestAssured;
 import com.maif.taskmanagerplus_api_rest_assured.config.ConfigLoader;
@@ -48,6 +50,14 @@ public class AuthUtil {
             authenticate(); // Calls the authenticate() method to ensure the token is obtained and set correctly
         }
         return token;
+    }
+    
+    
+    public static RequestSpecification addTokenHeader(RequestSpecification requestSpec) {
+        String authToken = getAuthToken();
+        return requestSpec
+            .header("Authorization", "Bearer " + authToken)
+            .header("Content-Type", "application/json");
     }
 
     /**

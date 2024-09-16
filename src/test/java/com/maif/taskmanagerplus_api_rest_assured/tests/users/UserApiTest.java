@@ -10,9 +10,9 @@ import java.sql.Timestamp;
 
 import org.junit.jupiter.api.Test;
 
+import com.maif.taskmanagerplus_api_rest_assured.auth.AuthUtil;
 import com.maif.taskmanagerplus_api_rest_assured.tests.base.BaseTest;
 import com.maif.taskmanagerplus_api_rest_assured.tests.util.DataBaseInsertUtil;
-import com.maif.taskmanagerplus_api_rest_assured.tests.util.TestUtil;
 
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
@@ -42,7 +42,7 @@ public class UserApiTest extends BaseTest {
         	String requestBody = "{ \"name\": \"Maicon Alexander\", \"email\": \"maiconalexandermf@taskmanagerplus.com\", \"password\": \"$2y$12$NSsM4gEOR7MKogflKR7GMeYugkttjNhAJMvFdHrBLaLp2HzlggP5W\" }";
 
             Response response = given()
-                .spec(TestUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
+                .spec(AuthUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
                 .body(requestBody)
                 .when()
                 .post(RestAssured.baseURI + USERS_PATH) // Builds the complete URL using RestAssured.baseURI and USERS_PATH
@@ -79,7 +79,7 @@ public class UserApiTest extends BaseTest {
         	String requestBody = "{ \"id\": " + id + ", \"name\": \"Sophia Jones Updated\", \"email\": \"sophia.jones.mf@taskmanagerplus.com\"}";
 
             given()
-                .spec(TestUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
+                .spec(AuthUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
                 .body(requestBody)
                 .when()
                 .put(RestAssured.baseURI + USERS_PATH + "/" + id) // Builds the complete URL using RestAssured.baseURI and USERS_PATH
@@ -117,7 +117,7 @@ public class UserApiTest extends BaseTest {
         	String requestBody = "{ \"currentPassword\": \"" + passwordFrom + "\", \"newPassword\": \"" + passwordTo + "\" }";
 
             given()
-                .spec(TestUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
+                .spec(AuthUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
                 .body(requestBody)
                 .when()
                 .put(RestAssured.baseURI + USERS_PATH + "/" + id + PASSWORD_PATH ) // Builds the complete URL using RestAssured.baseURI and USERS_PATH
@@ -157,7 +157,7 @@ public class UserApiTest extends BaseTest {
 
             // Makes the GET request to fetch user filtered by name
             RestAssured.given()
-                .spec(TestUtil.addTokenHeader(RestAssured.given())) // Adds the authorization header
+                .spec(AuthUtil.addTokenHeader(RestAssured.given())) // Adds the authorization header
                 .queryParam("name", "Charlotte Brown")
                 .when()
                 .get(RestAssured.baseURI + USERS_PATH)
@@ -197,7 +197,7 @@ public class UserApiTest extends BaseTest {
 
             // Makes the GET request to fetch user filtered by email
             RestAssured.given()
-                .spec(TestUtil.addTokenHeader(RestAssured.given())) // Adds the authorization header
+                .spec(AuthUtil.addTokenHeader(RestAssured.given())) // Adds the authorization header
                 .queryParam("email", "olivia.miller@taskmanagerplus.com")
                 .when()
                 .get(RestAssured.baseURI + USERS_PATH)
@@ -240,7 +240,7 @@ public class UserApiTest extends BaseTest {
 
             // Makes the GET request to fetch user filtered by name
             RestAssured.given()
-                .spec(TestUtil.addTokenHeader(RestAssured.given())) // Adds the authorization header
+                .spec(AuthUtil.addTokenHeader(RestAssured.given())) // Adds the authorization header
                 .queryParam("name", "Leo Johnson")
                 .queryParam("email", "leo.johnson@taskmanagerplus.com")
                 .when()

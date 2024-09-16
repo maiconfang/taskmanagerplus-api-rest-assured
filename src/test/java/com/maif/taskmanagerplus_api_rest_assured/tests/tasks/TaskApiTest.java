@@ -8,8 +8,7 @@ import static org.hamcrest.Matchers.equalTo;
 
 import org.junit.jupiter.api.Test;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.maif.taskmanagerplus_api_rest_assured.auth.AuthUtil;
 import com.maif.taskmanagerplus_api_rest_assured.model.TaskDTO;
 import com.maif.taskmanagerplus_api_rest_assured.tests.base.BaseTest;
 import com.maif.taskmanagerplus_api_rest_assured.tests.util.DataBaseInsertUtil;
@@ -34,7 +33,7 @@ public class TaskApiTest extends BaseTest {
     
 
     @Test
-    public void shouldCreateNewTaskSuccessfully() throws JsonProcessingException {
+    public void shouldCreateNewTaskSuccessfully() {
     	
     	// Create a TaskDTO object and set its fields
         TaskDTO taskDTO = new TaskDTO();
@@ -43,16 +42,15 @@ public class TaskApiTest extends BaseTest {
         taskDTO.setDueDate("2024-06-30T00:00:00Z");
         taskDTO.setCompleted(false);
 
-        // Convert the TaskDTO object to JSON
-        ObjectMapper objectMapper = new ObjectMapper();
-        String requestBody = objectMapper.writeValueAsString(taskDTO);
+     // Convert the TaskDTO object to JSON using the generic method
+        String requestBody = TestUtil.convertObjectToJson(taskDTO);
         
         int taskId = 0; // Inicialize taskId
         
         try {
             // Perform POST request to create a task
             Response response = given()
-                .spec(TestUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
+                .spec(AuthUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
                 .body(requestBody)
                 .when()
                 .post(RestAssured.baseURI + TASKS_PATH) // Builds the complete URL using RestAssured.baseURI and TASKS_PATH
@@ -80,7 +78,7 @@ public class TaskApiTest extends BaseTest {
 
         // Send the deletion request and log the details
         given()
-            .spec(TestUtil.addTokenHeader(RestAssured.given()))
+            .spec(AuthUtil.addTokenHeader(RestAssured.given()))
             .when()
             .delete(RestAssured.baseURI + TASKS_PATH + "/" + taskIdNew)
             .then()
@@ -97,7 +95,7 @@ public class TaskApiTest extends BaseTest {
 
             // Perform GET request to retrieve the task
             given()
-                .spec(TestUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
+                .spec(AuthUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
                 .when()
                 .get(RestAssured.baseURI + TASKS_PATH + "/" + taskIdGet) // Builds the complete URL using RestAssured.baseURI and TASKS_PATH
                 .then()
@@ -120,12 +118,19 @@ public class TaskApiTest extends BaseTest {
             // Insert a task into the database
             taskIdUpdate = DataBaseInsertUtil.insertTask("Task will be updated", "Task Description will be updated", TestUtil.convertToLocalDate("2024-06-20"), false);
             
+            
+            // Create a TaskDTO with default or custom values
+            TaskDTO taskDTO = TaskDTO.createTask(taskIdUpdate, "Updated Task", "New Task Description", "2024-07-01", true);
+            
+            // Convert the TaskDTO object to JSON using the generic method
+            String requestBody = TestUtil.convertObjectToJson(taskDTO);
+            
             // Prepare the request body for updating the task
-            String requestBody = "{ \"id\": " + taskIdUpdate + ", \"title\": \"Updated Task\", \"description\": \"Updated Description\", \"dueDate\": \"2024-07-01\", \"completed\": true }";
+            // String requestBody = "{ \"id\": " + taskIdUpdate + ", \"title\": \"Updated Task\", \"description\": \"Updated Description\", \"dueDate\": \"2024-07-01\", \"completed\": true }";
 
             // Perform PUT request to update the task
             given()
-                .spec(TestUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
+                .spec(AuthUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
                 .body(requestBody)
                 .when()
                 .put(RestAssured.baseURI + TASKS_PATH + "/" + taskIdUpdate) // Builds the complete URL using RestAssured.baseURI and TASKS_PATH
@@ -153,7 +158,7 @@ public class TaskApiTest extends BaseTest {
 
             // Perform GET request with query parameters
             given()
-                .spec(TestUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
+                .spec(AuthUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
                 .queryParam("taskId", taskIdFilterIdWithPag)
                 .queryParam("completed", "false")
                 .queryParam("page", 0)
@@ -187,7 +192,7 @@ public class TaskApiTest extends BaseTest {
 
             // Perform GET request with query parameters
             given()
-                .spec(TestUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
+                .spec(AuthUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
                 .queryParam("title", "Task to TitleWithPagination")
                 .queryParam("page", 0)
                 .queryParam("size", 10)
@@ -219,7 +224,7 @@ public class TaskApiTest extends BaseTest {
 
             // Perform GET request with query parameters
             given()
-                .spec(TestUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
+                .spec(AuthUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
                 .queryParam("description", "Task Description FilterDescriptionWithPagination")
                 .queryParam("page", 0)
                 .queryParam("size", 10)
@@ -251,7 +256,7 @@ public class TaskApiTest extends BaseTest {
 
             // Perform GET request with query parameters
             given()
-                .spec(TestUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
+                .spec(AuthUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
                 .queryParam("dueDate", "2024-06-20")
                 .queryParam("page", 0)
                 .queryParam("size", 10)
@@ -284,7 +289,7 @@ public class TaskApiTest extends BaseTest {
 
             // Perform GET request with query parameters
             given()
-                .spec(TestUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
+                .spec(AuthUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
                 .queryParam("completed", "false")
                 .queryParam("title", "Task to FilterCompletedAndTitle")
                 .queryParam("page", 0)
@@ -317,7 +322,7 @@ public class TaskApiTest extends BaseTest {
 
             // Perform GET request with query parameters
             given()
-                .spec(TestUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
+                .spec(AuthUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
                 .queryParam("taskId", taskId)
                 .queryParam("title", "Task to TitleDescriptionDueDate")
                 .queryParam("description", "Task Description TitleDescriptionDueDate")
@@ -354,7 +359,7 @@ public class TaskApiTest extends BaseTest {
 
             // Makes the GET request to fetch tasks filtered by title
             RestAssured.given()
-                .spec(TestUtil.addTokenHeader(RestAssured.given())) // Adds the authorization header
+                .spec(AuthUtil.addTokenHeader(RestAssured.given())) // Adds the authorization header
                 .queryParam("title", "Task to FilterTasksByTitleNoPagination")
                 .when()
                 .get(RestAssured.baseURI + TASKS_PATH + TASKS_PATH_NOPAGINATION)
@@ -378,10 +383,11 @@ public class TaskApiTest extends BaseTest {
     public void shouldReturnErrorForTitleExceedingMaxLength() {
     	String textTitle = "A simple task management system that allows users to create, update, delete, and mark tasks as completed. A simple task management system that "
     			+ "allows users to create, update, delete, and mark tasks as completed. A simple task management system that allows u";
+    	
     	String requestBody = "{ \"title\": \"" + textTitle + "\", \"description\": \"New Task Description\", \"dueDate\": \"2024-06-30T00:00:00Z\", \"completed\": false }";
 
     	 given()
-         .spec(TestUtil.addTokenHeader(RestAssured.given()))
+         .spec(AuthUtil.addTokenHeader(RestAssured.given()))
          .body(requestBody)
          .when()
          .post(RestAssured.baseURI + TASKS_PATH)
@@ -401,7 +407,7 @@ public class TaskApiTest extends BaseTest {
     	  String requestBody = "{ \"title\": \"New Task\", \"description\": \"New Task Description\", \"dueDate\": \"hii2024-06-30T00:00:00Z\", \"completed\": false }";
 
     	  given()
-          .spec(TestUtil.addTokenHeader(RestAssured.given()))
+          .spec(AuthUtil.addTokenHeader(RestAssured.given()))
           .body(requestBody)
           .when()
           .post(RestAssured.baseURI + TASKS_PATH)
@@ -470,7 +476,7 @@ public class TaskApiTest extends BaseTest {
 
         // Perform GET request to retrieve the non-existent task
         given()
-            .spec(TestUtil.addTokenHeader(RestAssured.given())) // Adds the authorization header using a helper method
+            .spec(AuthUtil.addTokenHeader(RestAssured.given())) // Adds the authorization header using a helper method
             .when()
             .get(RestAssured.baseURI + TASKS_PATH + "/" + nonExistentTaskId) // Builds the complete URL using RestAssured.baseURI and TASKS_PATH
             .then()

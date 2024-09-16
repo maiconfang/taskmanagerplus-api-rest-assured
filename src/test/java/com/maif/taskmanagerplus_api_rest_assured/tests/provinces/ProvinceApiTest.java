@@ -9,6 +9,8 @@ import static org.hamcrest.Matchers.equalTo;
 
 import org.junit.jupiter.api.Test;
 
+import com.maif.taskmanagerplus_api_rest_assured.auth.AuthUtil;
+import com.maif.taskmanagerplus_api_rest_assured.model.ProvinceDTO;
 import com.maif.taskmanagerplus_api_rest_assured.tests.base.BaseTest;
 import com.maif.taskmanagerplus_api_rest_assured.tests.util.DataBaseInsertUtil;
 import com.maif.taskmanagerplus_api_rest_assured.tests.util.TestUtil;
@@ -30,23 +32,28 @@ public class ProvinceApiTest extends BaseTest {
     
     /**
      * Test case to create a new province via API.
-     * It validates if the province is successfully created and checks its details.
+     * It validates if the province is successfully created and checks its details.      
      */
     @Test
     public void shouldCreateProvinceSuccessfully() {
         int id = -1; // Variable to store the ID of the created province
 
         try {
-            String requestBody = "{ \"name\": \"Provinces Teste mf\", \"abbreviation\": \"MF\" }";
-
+        	
+        	// Create a ProvinceDTO with default or custom values
+            ProvinceDTO provinceDTO = ProvinceDTO.createProvince("Provinces Test mf", "MF");
+            
+            // Convert the ProvinceDTO object to JSON using the generic method
+            String requestBody = TestUtil.convertObjectToJson(provinceDTO);
+        	
             Response response = given()
-                .spec(TestUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
+            	.spec(AuthUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
                 .body(requestBody)
                 .when()
                 .post(RestAssured.baseURI + PROVINCES_PATH) // Builds the complete URL using RestAssured.baseURI and PROVINCES_PATH
                 .then()
                 .statusCode(201)
-                .body("name", equalTo("Provinces Teste mf"))
+                .body("name", equalTo("Provinces Test mf"))
                 .body("abbreviation", equalTo("MF"))
                 .extract().response(); // Extracts the HTTP response
 
@@ -66,19 +73,24 @@ public class ProvinceApiTest extends BaseTest {
      */
     @Test
     public void shouldUpdateProvinceDetailsSuccessfully() {
-        int id = DataBaseInsertUtil.insertProvince("Provinces Teste Maif", "MF");
+        int id = DataBaseInsertUtil.insertProvince("Provinces Test Maif", "MF");
 
         try {
-            String requestBody = "{ \"id\": \"" + id + "\", \"name\": \"Provinces Teste Maif Updated\", \"abbreviation\": \"UP\" }";
-
+        	
+        	// Create a ProvinceDTO with default or custom values
+            ProvinceDTO provinceDTO = ProvinceDTO.createProvince(id, "Provinces Test Maif Updated", "UP");
+            
+            // Convert the ProvinceDTO object to JSON using the generic method
+            String requestBody = TestUtil.convertObjectToJson(provinceDTO);
+        	
             given()
-                .spec(TestUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
+                .spec(AuthUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
                 .body(requestBody)
                 .when()
                 .put(RestAssured.baseURI + PROVINCES_PATH + "/" + id) // Builds the complete URL using RestAssured.baseURI and PROVINCES_PATH
                 .then()
                 .statusCode(200)
-                .body("name", equalTo("Provinces Teste Maif Updated"))
+                .body("name", equalTo("Provinces Test Maif Updated"))
                 .body("abbreviation", equalTo("UP"));
         } finally {
             // Ensure the province is deleted even if the test fails
@@ -98,7 +110,7 @@ public class ProvinceApiTest extends BaseTest {
         try {
             // Send the deletion request and log the details
             given()
-                .spec(TestUtil.addTokenHeader(RestAssured.given()))
+                .spec(AuthUtil.addTokenHeader(RestAssured.given()))
                 .when()
                 .delete(RestAssured.baseURI + PROVINCES_PATH + "/" + id)
                 .then()
@@ -119,7 +131,7 @@ public class ProvinceApiTest extends BaseTest {
 
         try {
             given()
-                .spec(TestUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
+                .spec(AuthUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
                 .queryParam("name", "Province Filter Name with Pagination")
                 .queryParam("page", 0)
                 .queryParam("size", 10)
@@ -145,7 +157,7 @@ public class ProvinceApiTest extends BaseTest {
 
         try {
             given()
-                .spec(TestUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
+                .spec(AuthUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
                 .queryParam("abbreviation", "AA")
                 .queryParam("page", 0)
                 .queryParam("size", 10)
@@ -171,7 +183,7 @@ public class ProvinceApiTest extends BaseTest {
 
         try {
             given()
-                .spec(TestUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
+                .spec(AuthUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
                 .queryParam("name", "Province Filter Name And Abbreviation with Pagination")
                 .queryParam("abbreviation", "NA")
                 .queryParam("page", 0)
@@ -198,7 +210,7 @@ public class ProvinceApiTest extends BaseTest {
 
         try {
             given()
-                .spec(TestUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
+                .spec(AuthUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
                 .queryParam("name", "Province Filter Name And no Pagination")
                 .when()
                 .get(RestAssured.baseURI + PROVINCES_PATH + PROVINCES_PATH_NOPAGINATION)
@@ -219,23 +231,29 @@ public class ProvinceApiTest extends BaseTest {
      */
     @Test
     public void shouldReturnErrorWhenProvinceNameExceedsMaxLength() {
-    	String textName = "The project's goal is academic and aims to demonstrate knowledge of software quality, with an emphasis on this aspect ";
-    	String requestBody = "{ \"name\": \"" + textName + "\", \"abbreviation\": \"VV\"}";
+        String textName = "The project's goal is academic and aims to demonstrate knowledge of software quality, with an emphasis on this aspect";
 
-    	 given()
-         .spec(TestUtil.addTokenHeader(RestAssured.given()))
-         .body(requestBody)
-         .when()
-         .post(RestAssured.baseURI + PROVINCES_PATH)
-         .then()
-         .statusCode(400)
-         .body("status", equalTo(400))
-         .body("timestamp", notNullValue())
-         .body("type", equalTo("http://localhost:8080/max-length"))
-         .body("title", equalTo("Maximum length exceeded"))
-         .body("detail", containsString("Data too long for column 'name'"))
-         .body("userMessage", equalTo("An unexpected internal system error has occurred. Please try again and if the problem persists, contact your system administrator"));
+        // Create a ProvinceDTO with default or custom values
+        ProvinceDTO provinceDTO = ProvinceDTO.createProvince(textName, "VV");
+        
+        // Convert the ProvinceDTO object to JSON
+        String requestBody = TestUtil.convertObjectToJson(provinceDTO);
+
+        given()
+            .spec(AuthUtil.addTokenHeader(RestAssured.given()))
+            .body(requestBody)
+            .when()
+            .post(RestAssured.baseURI + PROVINCES_PATH)
+            .then()
+            .statusCode(400)
+            .body("status", equalTo(400))
+            .body("timestamp", notNullValue())
+            .body("type", equalTo("http://localhost:8080/max-length"))
+            .body("title", equalTo("Maximum length exceeded"))
+            .body("detail", containsString("Data too long for column 'name'"))
+            .body("userMessage", equalTo("An unexpected internal system error has occurred. Please try again and if the problem persists, contact your system administrator"));
     }
+
     
     /**
      * Test case to create a province with maximum character length for abbreviation via API.
@@ -247,7 +265,7 @@ public class ProvinceApiTest extends BaseTest {
     	String requestBody = "{ \"name\": \"" + textName + "\", \"abbreviation\": \"ALMLUPI\"}";
 
     	 given()
-         .spec(TestUtil.addTokenHeader(RestAssured.given()))
+         .spec(AuthUtil.addTokenHeader(RestAssured.given()))
          .body(requestBody)
          .when()
          .post(RestAssured.baseURI + PROVINCES_PATH)
