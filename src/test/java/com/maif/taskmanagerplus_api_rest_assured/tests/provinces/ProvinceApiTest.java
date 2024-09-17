@@ -71,6 +71,7 @@ public class ProvinceApiTest extends BaseTest {
             
             // Extract the ID of the created province from the JSON response
             id = response.path("id");
+            
         } finally {
             // Ensure the province is deleted even if the test fails
             if (id != -1) {
