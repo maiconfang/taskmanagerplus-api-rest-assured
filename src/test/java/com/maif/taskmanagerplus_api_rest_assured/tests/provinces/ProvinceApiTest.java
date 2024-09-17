@@ -39,13 +39,25 @@ public class ProvinceApiTest extends BaseTest {
         int id = -1; // Variable to store the ID of the created province
 
         try {
+        	// This is just an example of how we can send the data directly in JSON format to the API. Instead of using a DTO, 
+        	// we manually create the JSON string with the province's name and abbreviation.
+        	String requestBodyTest = "{ \"name\": \"Provinces Test mf\", \"abbreviation\": \"MF\"}";
+        	System.out.println(requestBodyTest);
         	
-        	// Create a ProvinceDTO with default or custom values
+        	// I created a ProvinceDTO object. This DTO is used to hold the data we want to send to the API, like the province's 
+        	//	name and abbreviation.
             ProvinceDTO provinceDTO = ProvinceDTO.createProvince("Provinces Test mf", "MF");
             
-            // Convert the ProvinceDTO object to JSON using the generic method
+            // I converted the ProvinceDTO into a JSON string using a helper method, TestUtil.convertObjectToJson(). 
+            // This is important because the API expects the data in JSON format.
             String requestBody = TestUtil.convertObjectToJson(provinceDTO);
         	
+            
+            // The .post() is an HTTP method used to send data to the server to create a new resource. 
+            // It sends a request to the specified URL with the provided data in the body. 
+            // Here, you could also have other variations like .get() to retrieve data, .put() to update a resource, or 
+            // .delete() to remove a resource.
+            
             Response response = given()
             	.spec(AuthUtil.addTokenHeader(RestAssured.given())) // Uses the helper method to add the authorization header
                 .body(requestBody)
@@ -56,7 +68,7 @@ public class ProvinceApiTest extends BaseTest {
                 .body("name", equalTo("Provinces Test mf"))
                 .body("abbreviation", equalTo("MF"))
                 .extract().response(); // Extracts the HTTP response
-
+            
             // Extract the ID of the created province from the JSON response
             id = response.path("id");
         } finally {

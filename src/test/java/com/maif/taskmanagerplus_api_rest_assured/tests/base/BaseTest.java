@@ -3,6 +3,7 @@ package com.maif.taskmanagerplus_api_rest_assured.tests.base;
 import org.junit.jupiter.api.BeforeAll;
 
 import com.maif.taskmanagerplus_api_rest_assured.auth.AuthUtil;
+import com.maif.taskmanagerplus_api_rest_assured.config.ConfigLoader;
 
 import io.restassured.RestAssured;
 
@@ -29,7 +30,7 @@ public class BaseTest {
         AuthUtil.authenticate();
         
         // Set the complete base URL
-        RestAssured.baseURI = "http://localhost:8080/v1";
+        RestAssured.baseURI = ConfigLoader.getProperty("auth.base.uri");
     }
     
 }
